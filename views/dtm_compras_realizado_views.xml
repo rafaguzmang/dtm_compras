@@ -34,6 +34,6 @@
             </field>
         </record>
 
-         <menuitem id="dtm_compras_realizado_menu" action="dtm_compras_realizado_accion" />
+<!--         <menuitem id="dtm_compras_realizado_menu" action="dtm_compras_realizado_accion" />-->
     </data>
 </odoo>
