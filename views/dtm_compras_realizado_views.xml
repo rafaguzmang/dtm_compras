@@ -15,7 +15,7 @@
                     <field name="orden_trabajo"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
-                    <field name="description"/>
+                    <field name="costo"/>
                 </tree>
             </field>
         </record>
@@ -28,7 +28,7 @@
                    <sheet>
                         <field name="nombre"/>
                         <field name="cantidad"/>
-                        <field name="description"/>
+                        <field name="costo"/>
                    </sheet>
                 </form>
             </field>
