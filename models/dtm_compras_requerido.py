@@ -11,6 +11,7 @@ class Compras(models.Model):
     nombre = fields.Char(string="Nombre", readonly = True)
     cantidad = fields.Integer(string="Cantidad", readonly = True)
     costo = fields.Float(string="Costo")
+    orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
 
     def action_done(self):
@@ -23,14 +24,7 @@ class Compras(models.Model):
                 "codigo":self.codigo_id.codigo,
                 "descripcion":self.nombre,
                 "cantidad":self.cantidad,
-                "fecha_recepcion":self.fecha_recepcion,
-                # "material_correcto":"false",
-                # "material_cantidad":"false",
-                # "material_calidad":"false",
-                # "material_entiempo":"false",
-                # "material_aprobado":"false",
-                # "motivo":"",
-                # "correctiva":""
+                "fecha_recepcion":self.fecha_recepcion
             }
             # print(self.proveedor_id.nombre)
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
@@ -46,9 +40,9 @@ class Compras(models.Model):
                 }
                 get_control.write(vals)
 
-            self.env.cr.execute("INSERT INTO dtm_compras_realizado (orden_trabajo,proveedor,codigo,nombre,cantidad,costo,fecha_compra,fecha_recepcion) VALUES ('"+
+            self.env.cr.execute("INSERT INTO dtm_compras_realizado (orden_trabajo,proveedor,codigo,nombre,cantidad,costo,fecha_compra,fecha_recepcion,orden_compra) VALUES ('"+
                                 self.orden_trabajo+"','"+self.proveedor_id.nombre+"', '"+self.codigo_id.codigo+"','"+self.nombre+"',"+str(self.cantidad)+","+str(self.costo)+
-                                ", '"+str(datetime.datetime.today())+"','"+str(self.fecha_recepcion)+"')")
+                                ", '"+str(datetime.datetime.today())+"','"+str(self.fecha_recepcion)+ "','"+str(self.orden_compra)+"')")
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id="+ str(self._origin.id))
 
 
@@ -77,6 +71,7 @@ class Realizado(models.Model):
     nombre = fields.Char(string="Nombre")
     cantidad = fields.Integer(string="Cantidad")
     costo = fields.Float(string="Costo")
+    orden_compra = fields.Char(string="Orden de Compra")
     fecha_compra = fields.Date(string="Fecha de compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Comprado")

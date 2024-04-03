@@ -18,6 +18,7 @@
                     <field name="nombre"/>
                     <field name="cantidad"/>
                     <field name="costo"/>
+                    <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
                             attrs="{'invisible': ['|','|',('proveedor_id', '=', False),('codigo_id', '=', False),('fecha_recepcion', '=', False)]}"/>

@@ -18,6 +18,7 @@
                     <field name="nombre"/>
                     <field name="cantidad"/>
                     <field name="costo"/>
+                    <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <field name="fecha_compra"/>
                     <field name="comprado"/>
