@@ -11,28 +11,21 @@
             <field name="name">dtm_compras_realizado_tree</field>
             <field name="model">dtm.compras.realizado</field>
             <field name="arch" type="xml">
-                <tree >
-                    <field name="orden_trabajo"/>
+                <tree decoration-info="comprado=='comprado'">
+                     <field name="orden_trabajo"/>
+                    <field name="proveedor" options="{'no_open':True}"/>
+                    <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
                     <field name="costo"/>
+                    <field name="fecha_recepcion"/>
+                    <field name="fecha_compra"/>
+                    <field name="comprado"/>
                 </tree>
             </field>
         </record>
 
-        <record id="dtm_compras_realizado_form" model="ir.ui.view">
-            <field name="name">dtm_compras_realizado_form</field>
-            <field name="model">dtm.compras.realizado</field>
-            <field name="arch" type="xml">
-                <form>
-                   <sheet>
-                        <field name="nombre"/>
-                        <field name="cantidad"/>
-                        <field name="costo"/>
-                   </sheet>
-                </form>
-            </field>
-        </record>
+
 
 <!--         <menuitem id="dtm_compras_realizado_menu" action="dtm_compras_realizado_accion" />-->
     </data>

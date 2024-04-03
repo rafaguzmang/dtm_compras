@@ -1,10 +1,11 @@
 from odoo import fields,models
+import datetime
 
 class Compras(models.Model):
     _name = "dtm.compras.requerido"
     _description = "Modulo de compras"
 
-    orden_trabajo = fields.Char(string="Orden de Trabajo")
+    orden_trabajo = fields.Char(string="ODT", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
     codigo_id = fields.Many2one("dtm.compras.codigo",string="Codigo")
     nombre = fields.Char(string="Nombre", readonly = True)
@@ -13,9 +14,9 @@ class Compras(models.Model):
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
 
     def action_done(self):
-        print(self.proveedor_id.nombre , self.codigo_id.codigo,  self.fecha_recepcion)
+        # print(self.proveedor_id.nombre , self.codigo_id.codigo,  self.fecha_recepcion)
         if self.proveedor_id.nombre  and self.codigo_id.codigo and self.fecha_recepcion:
-            print("Funciona")
+            # print("Funciona")
 
             vals = {
                 "proveedor":self.proveedor_id.nombre,
@@ -23,14 +24,13 @@ class Compras(models.Model):
                 "descripcion":self.nombre,
                 "cantidad":self.cantidad,
                 "fecha_recepcion":self.fecha_recepcion,
-
-                "material_correcto":"no",
-                "material_cantidad":"no",
-                "material_calidad":"no",
-                "material_entiempo":"no",
-                "material_aprobado":"rechazado",
-                "motivo":"",
-                "correctiva":""
+                # "material_correcto":"false",
+                # "material_cantidad":"false",
+                # "material_calidad":"false",
+                # "material_entiempo":"false",
+                # "material_aprobado":"false",
+                # "motivo":"",
+                # "correctiva":""
             }
             # print(self.proveedor_id.nombre)
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
@@ -46,8 +46,9 @@ class Compras(models.Model):
                 }
                 get_control.write(vals)
 
-            self.env.cr.execute("INSERT INTO dtm_compras_realizado (orden_trabajo,nombre,cantidad,description) VALUES ('"+
-                                self.orden_trabajo+"','"+self.nombre+"',"+str(self.cantidad)+",'"+str(self.costo)+"')")
+            self.env.cr.execute("INSERT INTO dtm_compras_realizado (orden_trabajo,proveedor,codigo,nombre,cantidad,costo,fecha_compra,fecha_recepcion) VALUES ('"+
+                                self.orden_trabajo+"','"+self.proveedor_id.nombre+"', '"+self.codigo_id.codigo+"','"+self.nombre+"',"+str(self.cantidad)+","+str(self.costo)+
+                                ", '"+str(datetime.datetime.today())+"','"+str(self.fecha_recepcion)+"')")
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id="+ str(self._origin.id))
 
 
@@ -68,11 +69,17 @@ class Compras(models.Model):
 class Realizado(models.Model):
     _name = "dtm.compras.realizado"
     _description = "Tabla donde se guardan las compras realizadas"
+    _order = "id desc"
 
     orden_trabajo = fields.Char(string="Orden de Trabajo")
+    proveedor = fields.Char(string="Proveedor")
+    codigo = fields.Char(string="Codigo")
     nombre = fields.Char(string="Nombre")
     cantidad = fields.Integer(string="Cantidad")
-    costo = fields.Text(string="Descripción")
+    costo = fields.Float(string="Costo")
+    fecha_compra = fields.Date(string="Fecha de compra")
+    fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
+    comprado = fields.Char(string="Comprado")
 
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
