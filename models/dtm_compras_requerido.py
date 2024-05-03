@@ -7,7 +7,7 @@ class Compras(models.Model):
 
     orden_trabajo = fields.Char(string="ODT", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
-    codigo_id = fields.Many2one("dtm.compras.codigo",string="Codigo")
+    codigo = fields.Char(string="Codigo")
     nombre = fields.Char(string="Nombre", readonly = True)
     cantidad = fields.Integer(string="Cantidad", readonly = True)
     costo = fields.Float(string="Costo")
@@ -83,9 +83,9 @@ class Proveedor(models.Model):
 
     nombre = fields.Char(string="Nombre")
 
-class Codigo(models.Model):
-    _name = "dtm.compras.codigo"
-    _descripcion = "Lista de cogigos"
-    _rec_name = "codigo"
-
-    codigo = fields.Char(string="Codigo")
+# class Codigo(models.Model):
+#     _name = "dtm.compras.codigo"
+#     _descripcion = "Lista de cogigos"
+#     _rec_name = "codigo"
+#
+#     codigo = fields.Char(string="Codigo")
