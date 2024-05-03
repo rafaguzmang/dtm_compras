@@ -15,9 +15,9 @@ class Compras(models.Model):
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
 
     def action_done(self):
-        # print(self.proveedor_id.nombre , self.codigo_id.codigo,  self.fecha_recepcion)
+        print("result 1",self.proveedor_id.nombre , self.codigo_id.codigo,  self.fecha_recepcion)
         if self.proveedor_id.nombre  and self.codigo_id.codigo and self.fecha_recepcion:
-            # print("Funciona")
+            print("Funciona")
 
             vals = {
                 "proveedor":self.proveedor_id.nombre,
@@ -26,12 +26,14 @@ class Compras(models.Model):
                 "cantidad":self.cantidad,
                 "fecha_recepcion":self.fecha_recepcion
             }
-            # print(self.proveedor_id.nombre)
+            print("result2",self.proveedor_id.nombre)
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
                                                                    ("codigo","=",self.codigo_id.codigo)])
             if not get_control:
+                print("result3")
                 get_control.create(vals)
             else:
+                print("result4")
                 cantidad = 0
                 for get in get_control:
                     cantidad += get.cantidad
