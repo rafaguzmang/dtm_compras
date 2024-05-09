@@ -5,9 +5,9 @@ class Compras(models.Model):
     _name = "dtm.compras.requerido"
     _description = "Modulo de compras"
 
-    orden_trabajo = fields.Char(string="ODT", readonly=True)
+    orden_trabajo = fields.Integer(string="ODT", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
-    codigo = fields.Char(string="Codigo")
+    codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre", readonly = True)
     cantidad = fields.Integer(string="Cantidad", readonly = True)
     costo = fields.Float(string="Costo")
@@ -53,7 +53,7 @@ class Compras(models.Model):
         get_info = self.env['dtm.compras.requerido'].search([])
         mapa = {}
         for get in get_info:
-            cadena = get.orden_trabajo + get.nombre + str(get.cantidad) + str(get.costo)
+            cadena = str(get.orden_trabajo) + get.nombre + str(get.cantidad) + str(get.costo)
             if mapa.get(cadena):
                 mapa[cadena] = mapa.get(cadena) + 1
                 self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id ="+str(get._origin.id))
