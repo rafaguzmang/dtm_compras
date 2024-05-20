@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="dtm_compras_odt_action" model="ir.actions.act_window">
+            <field name="name">ORDEN DE TRABAJO</field>
+            <field name="res_model">dtm.compras.odt</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="dtm_odt_tree" model="ir.ui.view">
+            <field name="name">dtm.compras.odt.tree</field>
+            <field name="model">dtm.compras.odt</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="ot_number"/>
+                    <field name="po_number"/>
+                    <field name="date_rel" widget="date"/>
+                    <field name="name_client"/>
+                    <field name="product_name"/>
+                     <field name="firma"/>
+                    <field name="status" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="dtm_odt_form" model="ir.ui.view">
+            <field name="name">dtm.compras.odt.form</field>
+            <field name="model">dtm.compras.odt</field>
+            <field name="arch" type="xml">
+                <form string="formulario">
+                    <header>
+                        <button type="object" name="action_imprimir_formato" string="ODT" icon="fa-print" class="btn btn-primary"/>
+                        <button type="object" name="action_imprimir_materiales" string="Lista de Materiales" icon="fa-print"  class="btn btn-primary"/>
+                        <button type="object" name="action_firma" string="Firma"  icon="fa-pencil" class="btn btn-primary"/>
+                    </header>
+
+                    <sheet>
+
+                            <h1 > ORDEN DE TRABAJO </h1>
+
+
+                            <h2> Diseño y Transformaciones Metálicas S. de R.L. de C.V.</h2>
+
+                        <group>
+                            <field name="status" />
+                        </group>
+                        <group>
+                            <group>
+                                <field name="name_client" />
+                                <field name="po_number"/>
+                            </group>
+                            <group>
+                                <field name="product_name" />
+                                <field name="ot_number"/>
+                            </group>
+                        </group>
+
+                        <group>
+                            <group>
+                                <field name="firma" />
+                                <field name="date_in" />
+                                <field name="date_rel"/>
+                            </group>
+                             <group>
+                                <field name="version_ot"  options='{"type": "number"}'/>
+                                <field name="cuantity" options='{"type": "number"}'/>
+                                <field name="color" />
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page  string="RESUMEN">
+                                <group>
+                                    <field name="description"/>
+                                </group>
+                            </page>
+
+                              MATERIALES OR
+                            <page string="MATERIALES" >
+                                <field name="materials_ids" >
+                                    <tree editable="bottom">
+                                        <field name="materials_list"/>  <button type="object" name="action_materials_list" icon="fa-check" class="btn btn-primary"/>
+                                        <field name="materials_cuantity" options='{"type": "number"} ' attrs="{'invisible': [('materials_list', '=', False)]}"/>
+                                        <field name="materials_inventory"/>
+                                        <field name="materials_required" options='{"type": "number"}'/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="PLANOS">
+                                <field name="anexos_id" >
+                                     <tree>
+                                            <field name="nombre" invisible="0"></field>
+                                     </tree>
+                                     <form>
+                                        <group >
+                                            <field name="documentos" filename="nombre" widget="pdf_viewer"></field>
+                                            <field name="nombre" invisible="1"></field>
+                                        </group>
+                                     </form>
+                                </field>
+                            </page>
+
+                            <page string="NOTAS">
+                                <field name="notes"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <menuitem id="dtm_compras_odt_menu" action="dtm_compras_odt_action" />
+    </data>
+</odoo>
