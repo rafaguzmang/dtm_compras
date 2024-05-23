@@ -35,9 +35,9 @@ class ComprasOdt(models.Model):
         print("resultado",get_ot)
         get_ot.write({"firma_compras": self.firma})
 
-
     def action_imprimir_formato(self): # Imprime según el formato que se esté llenando
         return self.env.ref("dtm_odt.formato_orden_de_trabajo").report_action(self)
 
     def action_imprimir_materiales(self): # Imprime según el formato que se esté llenando
         return self.env.ref("dtm_odt.formato_lista_materiales").report_action(self)
+
