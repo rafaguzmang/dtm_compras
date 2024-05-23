@@ -2,7 +2,7 @@ id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_dtm_compras_requerido,access.dtm.compras.requerido,model_dtm_compras_requerido,base.group_user,1,1,1,1
 access_dtm_compras_realizado,access.dtm.compras.realizado,model_dtm_compras_realizado,base.group_user,1,1,1,1
 access_dtm_compras_proveedor,access.dtm.compras.proveedor,model_dtm_compras_proveedor,base.group_user,1,1,1,1
-access_dtm_compras_odt,access.dtm.compras.odt,model_dtm_compras_odt,base.group_user,1,1,1,1/
+access_dtm_compras_odt,access.dtm.compras.odt,model_dtm_compras_odt,base.group_user,1,1,1,1
 
 
 

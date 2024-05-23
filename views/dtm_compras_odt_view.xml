@@ -17,7 +17,8 @@
                     <field name="date_rel" widget="date"/>
                     <field name="name_client"/>
                     <field name="product_name"/>
-                     <field name="firma"/>
+                    <field name="firma"/>
+                    <field name="disenador"/>
                     <field name="status" />
                 </tree>
             </field>
@@ -48,6 +49,7 @@
                             <group>
                                 <field name="name_client" />
                                 <field name="po_number"/>
+                                <field name="disenador"/>
                             </group>
                             <group>
                                 <field name="product_name" />
@@ -109,6 +111,6 @@
             </field>
         </record>
 
-        <menuitem id="dtm_compras_odt_menu" action="dtm_compras_odt_action" />
+<!--        <menuitem id="dtm_compras_odt_menu" action="dtm_compras_odt_action" />-->
     </data>
 </odoo>

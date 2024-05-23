@@ -19,6 +19,7 @@ class ComprasOdt(models.Model):
     cuantity = fields.Integer(string="CANTIDAD",readonly=True)
     materials_ids = fields.Many2many("dtm.materials.line",string="Lista")
     firma = fields.Char(string="Firma Compras", readonly = True)
+    disenador = fields.Char(string="Diseñador")
 
     anexos_id = fields.Many2many("dtm.proceso.anexos")
 
