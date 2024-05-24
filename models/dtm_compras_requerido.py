@@ -43,18 +43,18 @@ class Compras(models.Model):
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id="+ str(self._origin.id))
 
 
-    def get_view(self, view_id=None, view_type='form', **options):
-        res = super(Compras,self).get_view(view_id, view_type,**options)
-        get_info = self.env['dtm.compras.requerido'].search([])
-        mapa = {}
-        for get in get_info:
-            cadena = str(get.orden_trabajo) + get.nombre + str(get.cantidad) + str(get.costo)
-            if mapa.get(cadena):
-                mapa[cadena] = mapa.get(cadena) + 1
-                self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id ="+str(get._origin.id))
-            else:
-                mapa[cadena] = 1
-        return res
+    # def get_view(self, view_id=None, view_type='form', **options):
+    #     res = super(Compras,self).get_view(view_id, view_type,**options)
+    #     get_info = self.env['dtm.compras.requerido'].search([])
+    #     mapa = {}
+    #     for get in get_info:
+    #         cadena = str(get.orden_trabajo) + get.nombre + str(get.cantidad) + str(get.costo)
+    #         if mapa.get(cadena):
+    #             mapa[cadena] = mapa.get(cadena) + 1
+    #             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id ="+str(get._origin.id))
+    #         else:
+    #             mapa[cadena] = 1
+    #     return res
 
 
 class Realizado(models.Model):
@@ -80,9 +80,4 @@ class Proveedor(models.Model):
 
     nombre = fields.Char(string="Nombre")
 
-# class Codigo(models.Model):
-#     _name = "dtm.compras.codigo"
-#     _descripcion = "Lista de cogigos"
-#     _rec_name = "codigo"
-#
-#     codigo = fields.Char(string="Codigo")
+
