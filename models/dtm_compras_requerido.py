@@ -23,7 +23,6 @@ class Compras(models.Model):
                 "cantidad":self.cantidad,
                 "fecha_recepcion":self.fecha_recepcion
             }
-
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
                                                                    ("codigo","=",self.codigo)])
             if not get_control:
