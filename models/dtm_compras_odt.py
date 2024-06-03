@@ -34,7 +34,10 @@ class ComprasOdt(models.Model):
         get_ot = self.env['dtm.odt'].search([("ot_number","=",self.ot_number)])
         get_ot.write({"firma_compras": self.firma})
         get_procesos = self.env['dtm.proceso'].search([("ot_number","=",self.ot_number)])
-        get_procesos.write({"firma_compras": "Compras"})
+        get_procesos.write({
+            "firma_compras": self.firma,
+            "firma_compras_kanba": "Compras"
+        })
 
     def action_imprimir_formato(self): # Imprime según el formato que se esté llenando
         return self.env.ref("dtm_odt.formato_orden_de_trabajo").report_action(self)
