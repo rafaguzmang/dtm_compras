@@ -21,7 +21,7 @@
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
-                            attrs="{'invisible': ['|','|',('proveedor_id', '=', False),('codigo', '=', False),('fecha_recepcion', '=', False)]}"/>
+                            attrs="{'invisible': ['|',('proveedor_id', '=', False),('codigo', '=', False)]}"/>
                 </tree>
             </field>
         </record>
