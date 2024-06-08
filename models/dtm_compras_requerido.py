@@ -15,7 +15,7 @@ class Compras(models.Model):
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
 
     def action_done(self):
-        if self.proveedor_id.nombre  and self.codigo and self.fecha_recepcion:
+        if self.proveedor_id.nombre:
             vals = {
                 "proveedor":self.proveedor_id.nombre,
                 "codigo":self.codigo,
