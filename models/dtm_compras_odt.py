@@ -92,6 +92,7 @@ class ComprasOdt(models.Model):
 
     def action_firma(self):
         self.firma = self.env.user.partner_id.name
+        self.firma_compras_kanba = "Compras"
         get_ot = self.env['dtm.odt'].search([("ot_number","=",self.ot_number)])
         get_ot.write({"firma_compras": self.firma})
         get_procesos = self.env['dtm.proceso'].search([("ot_number","=",self.ot_number)])
