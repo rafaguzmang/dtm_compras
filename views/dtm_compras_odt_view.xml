@@ -4,9 +4,96 @@
         <record id="dtm_compras_odt_action" model="ir.actions.act_window">
             <field name="name">ORDEN DE TRABAJO</field>
             <field name="res_model">dtm.compras.odt</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,kanban</field>
         </record>
 
+         <record id="dtm_compras_odt_kanban" model="ir.ui.view">
+            <field name="name">dtm_compras_odt_kanban</field>
+            <field name="model">dtm.compras.odt</field>
+            <field name="arch" type="xml">
+
+                 <kanban default_group_by = "status">
+                    <template>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click" >
+                                <div class="oe_kanban_details ">
+                                        <h2 style="color:#f00">
+                                            <field name="pausado" />
+                                        </h2>
+                                        <div class="porcentaje">
+                                            <field name="firma_parcial" invisible="1"/>
+                                            <div class="parcial" attrs="{'invisible': [('firma_parcial', '!=', True)]}">
+
+                                            </div>
+                                            <field name="materials" widget="percentpie"/>
+                                        </div>
+                                        <strong class="o_kanban_record_title display-row"  >
+                                            <field name="tipe_order" />
+                                            <field name="name_client" />
+                                            <field name="ot_number" />
+                                        </strong>
+                                    <div class="o_kanban_tags_section flex-container"  >
+                                        <ul>
+                                            <li>
+                                                <field name="firma_diseno"/>
+                                            </li>
+                                            <li class="display-row">
+                                                <field name="firma_ventas_kanba" />
+                                                <field name="firma_compras_kanba" />
+                                                <field name="firma_almacen_kanba" />
+                                                <field name="firma_calidad_kanba" />
+                                            </li>
+                                            <li>
+                                                <field name="product_name"/>
+                                            </li>
+                                            <li>
+                                                Entrada: <field name="date_in"/>
+                                            </li>
+                                             <li>
+                                                Entrega <field name="date_rel"  widget="remaining_days"/>
+                                            </li>
+                                            <li>
+                                                Notas <field name="notes"/>
+                                            </li>
+                                        </ul>
+
+                                    </div >
+                                    <div class="card-footer" >
+                                        <strong class="o_kanban_record_title">
+                                            <field name="description"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <style>
+                                .porcentaje{
+                                    text-align: right;
+                                }
+                                .flex-container{
+                                    display: flex;
+                                    flex-direction: column;
+                                }
+                                .display-row{
+                                    display: flex;
+                                    justify-content: space-between;
+                                }
+                                .parcial{
+                                    float: left;
+                                    width: 10px;
+                                    height: 40px;
+                                    background: #e4e405;
+                                    border: 1px solid;
+                                    border-radius: 4px;
+                                    padding-left: 35px;
+                                }
+
+                            </style>
+                        </t>
+                    </template>
+
+                </kanban>
+            </field>
+        </record>
         <record id="dtm_odt_tree" model="ir.ui.view">
             <field name="name">dtm.compras.odt.tree</field>
             <field name="model">dtm.compras.odt</field>
@@ -18,7 +105,7 @@
                     <field name="name_client"/>
                     <field name="product_name"/>
                     <field name="firma"/>
-                    <field name="disenador"/>
+                    <field name="firma_diseno"/>
                     <field name="status" />
                 </tree>
             </field>
@@ -49,7 +136,7 @@
                             <group>
                                 <field name="name_client" />
                                 <field name="po_number"/>
-                                <field name="disenador"/>
+                                <field name="firma_diseno"/>
                             </group>
                             <group>
                                 <field name="product_name" />
