@@ -13,6 +13,7 @@
             <field name="arch" type="xml">
                 <tree  editable="bottom">
                     <field name="orden_trabajo"/>
+                    <field name="disenador"/>
                     <field name="proveedor_id" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>

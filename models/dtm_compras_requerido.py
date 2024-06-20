@@ -13,6 +13,7 @@ class Compras(models.Model):
     costo = fields.Float(string="Costo")
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
+    disenador = fields.Char(string="Diseñador")
 
     def action_done(self):
         if self.proveedor_id.nombre:
