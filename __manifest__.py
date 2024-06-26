@@ -4,7 +4,7 @@
     'version': '1.0',
     'author': "Rafael Guzmán",
     "description": "Modulo para el área de compras",
-    "depends":["dtm_procesos"],
+    "depends":['base', 'mail',"dtm_procesos"],
     "data":[
         'security/ir.model.access.csv',
         #Views

@@ -4,6 +4,7 @@ from datetime import datetime
 
 class ComprasOdt(models.Model):
     _name = "dtm.compras.odt"
+    _inherit = ['mail.thread']
     _description = "Visualización de la orden de trabajo"
     _order = "ot_number desc"
 
