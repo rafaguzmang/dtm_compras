@@ -9,7 +9,7 @@ class Compras(models.Model):
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
     codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre", readonly = True)
-    cantidad = fields.Integer(string="Cantidad", readonly = True)
+    cantidad = fields.Integer(string="Cantidad")
     costo = fields.Float(string="Costo")
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
@@ -64,7 +64,7 @@ class Realizado(models.Model):
 
     orden_trabajo = fields.Char(string="Orden de Trabajo")
     proveedor = fields.Char(string="Proveedor")
-    codigo = fields.Char(string="Codigo")
+    codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre")
     cantidad = fields.Integer(string="Cantidad")
     costo = fields.Float(string="Costo")
