@@ -11,7 +11,8 @@
             <field name="name">dtm_compras_requerido_tree</field>
             <field name="model">dtm.compras.requerido</field>
             <field name="arch" type="xml">
-                <tree  editable="bottom">
+
+                <tree  editable="bottom"  decoration-primary="orden_trabajo != False">
                     <field name="orden_trabajo"/>
                     <field name="disenador"/>
                     <field name="proveedor_id" options="{'no_open':True}"/>
@@ -21,6 +22,7 @@
                     <field name="costo"/>
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
+                    <field name="observacion"/>
                     <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
                             attrs="{'invisible': ['|',('proveedor_id', '=', False),('codigo', '=', False)]}"/>
                 </tree>
