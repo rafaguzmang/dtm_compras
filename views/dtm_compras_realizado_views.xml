@@ -11,12 +11,15 @@
             <field name="name">dtm_compras_realizado_tree</field>
             <field name="model">dtm.compras.realizado</field>
             <field name="arch" type="xml">
-                <tree decoration-info="comprado=='comprado'">
+                <tree decoration-success="comprado=='comprado'"
+                        decoration-warning="comprado!='comprado'"
+                        decoration-danger="comprado=='comprado' and cantidad!=cantidad_almacen">
                      <field name="orden_trabajo"/>
                     <field name="proveedor" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
+                    <field name="cantidad_almacen"/>
                     <field name="costo"/>
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>

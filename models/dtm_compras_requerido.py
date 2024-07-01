@@ -14,6 +14,7 @@ class Compras(models.Model):
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
     disenador = fields.Char(string="Diseñador")
+    observacion = fields.Char(string="Observaciones")
 
     def action_done(self):
         if self.proveedor_id.nombre:
@@ -67,6 +68,7 @@ class Realizado(models.Model):
     codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre")
     cantidad = fields.Integer(string="Cantidad")
+    cantidad_almacen = fields.Integer(string="C-Real")
     costo = fields.Float(string="Costo")
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_compra = fields.Date(string="Fecha de compra")
