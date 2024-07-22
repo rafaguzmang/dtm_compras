@@ -49,7 +49,7 @@ class Compras(models.Model):
         get_info = self.env['dtm.compras.requerido'].search([])
         mapa = {}
         for get in get_info:
-            cadena = str(get.orden_trabajo) + get.codigo + get.nombre + str(get.cantidad)
+            cadena = str(get.orden_trabajo) + str(get.codigo) + get.nombre + str(get.cantidad)
             if mapa.get(cadena):
                 mapa[cadena] = mapa.get(cadena) + 1
                 get.unlink()

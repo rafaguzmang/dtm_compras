@@ -74,7 +74,6 @@ class ComprasOdt(models.Model):
                 "description": proceso.description,
                 "pausado": proceso.pausado,
                 "status_pausado": proceso.status_pausado,
-                "pausa_motivo": proceso.pausa_motivo,
                 "materials": proceso.materials,
                 "firma_parcial": proceso.firma_parcial,
                 "firma_ventas_kanba": proceso.firma_ventas_kanba,
