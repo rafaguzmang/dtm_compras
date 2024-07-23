@@ -5,7 +5,7 @@ class Compras(models.Model):
     _name = "dtm.compras.requerido"
     _description = "Modulo de compras"
 
-    orden_trabajo = fields.Integer(string="ODT", readonly=True)
+    orden_trabajo = fields.Char(string="ODT", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
     codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre", readonly = True)
@@ -48,13 +48,31 @@ class Compras(models.Model):
         res = super(Compras,self).get_view(view_id, view_type,**options)
         get_info = self.env['dtm.compras.requerido'].search([])
         mapa = {}
-        for get in get_info:
+        for get in get_info:#Borra filas repetidas basadas en número de orden, codigo de material y cantidad
             cadena = str(get.orden_trabajo) + str(get.codigo) + get.nombre + str(get.cantidad)
             if mapa.get(cadena):
                 mapa[cadena] = mapa.get(cadena) + 1
                 get.unlink()
             else:
                 mapa[cadena] = 1
+        mapa2 = {}
+        for material in get_info:
+            if mapa2.get(material.codigo):
+                mapa2[material.codigo] = mapa2.get(material.codigo) + 1
+                get_col = self.env['dtm.compras.requerido'].search([('codigo','=',material.codigo)],order='id asc', limit=1)
+                odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
+                disenador = f"{get_col.disenador} {material.disenador}"
+                cantidad = get_col.cantidad + material.cantidad
+                val = {
+                    "orden_trabajo":odt,
+                    "disenador":disenador,
+                    "cantidad":cantidad,
+                }
+                get_col.write(val)
+                material.unlink()
+            else:
+                mapa2[material.codigo] = 1
+
         return res
 
 
