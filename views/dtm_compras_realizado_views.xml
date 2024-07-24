@@ -13,8 +13,8 @@
             <field name="arch" type="xml">
                 <tree decoration-success="comprado=='comprado'"
                         decoration-warning="comprado!='comprado'"
-                        decoration-danger="comprado=='comprado' and cantidad!=cantidad_almacen">
-                     <field name="orden_trabajo"/>
+                        decoration-danger="comprado=='comprado' and cantidad &gt; cantidad_almacen">
+                    <field name="orden_trabajo"/>
                     <field name="proveedor" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
