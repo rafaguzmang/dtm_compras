@@ -95,7 +95,7 @@ class Realizado(models.Model):
 
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
-    _descripcion = "Lista de provedores"
+    _description = "Lista de provedores"
     _rec_name = "nombre"
 
     nombre = fields.Char(string="Nombre")

@@ -14,6 +14,7 @@
         #Menú
         'views/dtm_menu.xml'
 
-    ]
+    ],
+    'license': 'LGPL-3',
 }
 
