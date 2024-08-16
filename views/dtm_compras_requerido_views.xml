@@ -14,6 +14,7 @@
 
                 <tree  editable="bottom"  decoration-primary="orden_trabajo != False">
                     <field name="orden_trabajo"/>
+                    <field name="create_date"/>
                     <field name="disenador"/>
                     <field name="proveedor_id" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
