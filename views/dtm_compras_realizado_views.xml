@@ -20,9 +20,7 @@
                     <separator/>
                     <filter string="Comprado" name="comprado" domain="[('comprado','!=',False)]"/>
                     <filter string="No Comprado" name="no-comprado" domain="[('comprado','=',False)]"/>
-                    <separator/>
-                    <filter string="Comprado" name="comprado" domain="[('comprado','!=',False)]"/>
-                    <filter string="No Comprado" name="no-comprado" domain="[('comprado','=',False)]"/>
+
                </search>
             </field>
         </record>
