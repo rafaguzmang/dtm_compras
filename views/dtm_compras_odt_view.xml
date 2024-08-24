@@ -165,14 +165,13 @@
 
                               MATERIALES OR
                             <page string="MATERIALES" >
-                                <field name="materials_ids" >
-                                    <tree editable="bottom">
-                                        <field name="materials_list"/>  <button type="object" name="action_materials_list" icon="fa-check" class="btn btn-primary"/>
-                                        <field name="materials_cuantity" options='{"type": "number"} ' attrs="{'invisible': [('materials_list', '=', False)]}"/>
-                                        <field name="materials_inventory"/>
-                                        <field name="materials_required" options='{"type": "number"}'/>
-                                    </tree>
-                                </field>
+<!--                                <field name="materials_ids" >-->
+<!--                                    <tree editable="bottom">-->
+<!--                                        <field name="materials_cuantity" options='{"type": "number"} '/>-->
+<!--                                        <field name="materials_inventory"/>-->
+<!--                                        <field name="materials_required" options='{"type": "number"}'/>-->
+<!--                                    </tree>-->
+<!--                                </field>-->
                             </page>
                             <page string="PLANOS">
                                 <field name="anexos_id" >
