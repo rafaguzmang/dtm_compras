@@ -20,7 +20,7 @@ class ComprasOdt(models.Model):
     version_ot = fields.Integer(string="VERSIÓN OT",default=1)
     color = fields.Char(string="COLOR",default="N/A")
     cuantity = fields.Integer(string="CANTIDAD",readonly=True)
-    materials_ids = fields.Many2many("dtm.materials.line",string="Lista",readonly=True)
+    # materials_ids = fields.Many2many("dtm.materials.line",string="Lista",readonly=True)
     firma = fields.Char(string="Firma Compras", readonly = True)
     firma_compras = fields.Char(string = "Compras", readonly = True)
     firma_diseno = fields.Char(string = "Diseñador", readonly = True)
