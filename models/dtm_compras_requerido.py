@@ -1,4 +1,4 @@
-from odoo import fields,models
+from odoo import fields,models,api
 import datetime
 import re
 
@@ -10,12 +10,24 @@ class Compras(models.Model):
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
     codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre", readonly = True)
-    cantidad = fields.Integer(string="Cantidad")
-    costo = fields.Float(string="Costo")
+    cantidad = fields.Integer(string="Cantidad",readonly=True)
+    unitario = fields.Float(string="P.Unitario")
+    costo = fields.Float(string="Total", compute = "_compute_costo",store=True)
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
     disenador = fields.Char(string="Diseñador")
     observacion = fields.Char(string="Observaciones")
+    aprovacion = fields.Boolean(string="Aprovado")
+
+    @api.onchange("aprovacion")
+    def _onchange_aprovacion(self):
+        self.aprovacion = False if not self.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com"] else True
+
+    @api.depends("cantidad","unitario")
+    def _compute_costo(self):
+        for result in self:
+            result.costo = result.cantidad * result.unitario
+
 
     def action_done(self):
         if self.proveedor_id.nombre:
@@ -24,7 +36,9 @@ class Compras(models.Model):
                 "codigo":self.codigo,
                 "descripcion":self.nombre,
                 "cantidad":self.cantidad,
-                "fecha_recepcion":self.fecha_recepcion
+                "fecha_recepcion":self.fecha_recepcion,
+                "unitario": self.unitario,
+                "aprovacion": self.aprovacion and "Aprobado",
             }
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
                                                                    ("codigo","=",self.codigo)])
@@ -94,12 +108,15 @@ class Realizado(models.Model):
     codigo = fields.Integer(string="Codigo")
     nombre = fields.Char(string="Nombre")
     cantidad = fields.Integer(string="Cantidad")
+    unitario = fields.Float(string="P.Unitario")
+    costo = fields.Float(string="Total")
     cantidad_almacen = fields.Integer(string="C-Real")
-    costo = fields.Float(string="Costo")
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_compra = fields.Date(string="Fecha de compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Comprado")
+    aprovacion = fields.Char(string="Aprovado",readonly = True)
+
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado,self).get_view(view_id, view_type,**options)
