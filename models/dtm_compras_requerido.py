@@ -101,6 +101,18 @@ class Realizado(models.Model):
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Comprado")
 
+    def get_view(self, view_id=None, view_type='form', **options):
+        res = super(Realizado,self).get_view(view_id, view_type,**options)
+
+        get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
+        ordenes_list = set(list(filter(lambda x:len(x)<4,get_self)))
+        get_facturado = self.env['dtm.facturado.odt'].search([]).mapped('ot_number')
+        [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo","=",odt)]).unlink()  for odt in ordenes_list]
+        get_facturado = self.env['dtm.facturado.npi'].search([]).mapped('ot_number')
+        [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo","=",odt)]).unlink()  for odt in ordenes_list]
+
+        return res
+
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
     _description = "Lista de provedores"
