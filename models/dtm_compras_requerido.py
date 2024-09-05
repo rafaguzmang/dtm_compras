@@ -1,5 +1,6 @@
 from odoo import fields,models
 import datetime
+import re
 
 class Compras(models.Model):
     _name = "dtm.compras.requerido"
@@ -47,6 +48,7 @@ class Compras(models.Model):
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras,self).get_view(view_id, view_type,**options)
         get_info = self.env['dtm.compras.requerido'].search([])
+<<<<<<< HEAD
         mapa = {}
         for get in get_info:#Borra filas repetidas basadas en número de orden, codigo de material y cantidad
             cadena = str(get.orden_trabajo) + str(get.codigo) + get.nombre + str(get.cantidad)
@@ -72,6 +74,40 @@ class Compras(models.Model):
         #         material.unlink()
         #     else:
         #         mapa2[material.codigo] = 1
+=======
+        # mapa = {}
+        # for get in get_info:#Borra filas repetidas basadas en número de orden, codigo de material y cantidad
+        #     cadena = str(get.orden_trabajo) + str(get.codigo) + get.nombre + str(get.cantidad)
+        #     if mapa.get(cadena):
+        #         mapa[cadena] = mapa.get(cadena) + 1
+        #         get.unlink()
+        #     else:
+        #         mapa[cadena] = 1
+        mapa2 = {}
+        for material in get_info:
+            if mapa2.get(material.codigo):
+                mapa2[material.codigo] = mapa2.get(material.codigo) + 1
+                get_col = self.env['dtm.compras.requerido'].search([('codigo','=',material.codigo)],order='id asc', limit=1)
+                odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
+                #-------------------------------------- Lógica para obtener las ordenes de trabajo separadas y evitar que las peticiones muten ----------------------
+                listOdts = set(odt.split(" "))
+                odt = ",".join(listOdts)
+                odt = re.sub(","," ",odt)
+                listOdts = set(odt.split(" "))
+                #----------------------------------------------------------------------------------------------------------------------------------------------------
+                listcant = [self.env['dtm.materials.line'].search([("model_id","=",self.env['dtm.odt'].search([("ot_number","=",odt)]).id),("materials_list","=",material.codigo)]).materials_required for odt in listOdts]
+                listdis = set([self.env['dtm.odt'].search([("ot_number","=",odt)]).firma for odt in listOdts])
+
+                val = {
+                    "orden_trabajo":odt,
+                    "disenador":"".join(listdis),
+                    "cantidad":sum(listcant),
+                }
+                get_col.write(val)
+                material.unlink()
+            else:
+                mapa2[material.codigo] = 1
+>>>>>>> b6adfc42059d5f39065728ecd2befc0f665c3485
 
         return res
 
@@ -92,6 +128,18 @@ class Realizado(models.Model):
     fecha_compra = fields.Date(string="Fecha de compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Comprado")
+
+    def get_view(self, view_id=None, view_type='form', **options):
+        res = super(Realizado,self).get_view(view_id, view_type,**options)
+
+        get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
+        ordenes_list = set(list(filter(lambda x:len(x)<4,get_self)))
+        get_facturado = self.env['dtm.facturado.odt'].search([]).mapped('ot_number')
+        [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo","=",odt)]).unlink()  for odt in ordenes_list]
+        get_facturado = self.env['dtm.facturado.npi'].search([]).mapped('ot_number')
+        [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo","=",odt)]).unlink()  for odt in ordenes_list]
+
+        return res
 
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
