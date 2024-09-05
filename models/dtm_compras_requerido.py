@@ -55,23 +55,23 @@ class Compras(models.Model):
                 get.unlink()
             else:
                 mapa[cadena] = 1
-        mapa2 = {}
-        for material in get_info:
-            if mapa2.get(material.codigo):
-                mapa2[material.codigo] = mapa2.get(material.codigo) + 1
-                get_col = self.env['dtm.compras.requerido'].search([('codigo','=',material.codigo)],order='id asc', limit=1)
-                odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
-                disenador = f"{get_col.disenador} {material.disenador}"
-                cantidad = get_col.cantidad + material.cantidad
-                val = {
-                    "orden_trabajo":odt,
-                    "disenador":disenador,
-                    "cantidad":cantidad,
-                }
-                get_col.write(val)
-                material.unlink()
-            else:
-                mapa2[material.codigo] = 1
+        # mapa2 = {}
+        # for material in get_info:
+        #     if mapa2.get(material.codigo):
+        #         mapa2[material.codigo] = mapa2.get(material.codigo) + 1
+        #         get_col = self.env['dtm.compras.requerido'].search([('codigo','=',material.codigo)],order='id asc', limit=1)
+        #         odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
+        #         disenador = f"{get_col.disenador} {material.disenador}"
+        #         cantidad = get_col.cantidad + material.cantidad
+        #         val = {
+        #             "orden_trabajo":odt,
+        #             "disenador":disenador,
+        #             "cantidad":cantidad,
+        #         }
+        #         get_col.write(val)
+        #         material.unlink()
+        #     else:
+        #         mapa2[material.codigo] = 1
 
         return res
 
