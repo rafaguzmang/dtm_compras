@@ -18,10 +18,7 @@ class Compras(models.Model):
     disenador = fields.Char(string="Diseñador")
     observacion = fields.Char(string="Observaciones")
     aprovacion = fields.Boolean(string="Aprovado")
-
-    @api.onchange("aprovacion")
-    def _onchange_aprovacion(self):
-        self.aprovacion = False if not self.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com"] else True
+    permiso = fields.Boolean()
 
     @api.depends("cantidad","unitario")
     def _compute_costo(self):
@@ -70,6 +67,9 @@ class Compras(models.Model):
         #         get.unlink()
         #     else:
         #         mapa[cadena] = 1
+        for result in get_info:
+            result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",'ventas1@dtmindustry.com',"rafaguzmang@hotmail.com"] else False
+
         mapa2 = {}
         for material in get_info:
             if mapa2.get(material.codigo):

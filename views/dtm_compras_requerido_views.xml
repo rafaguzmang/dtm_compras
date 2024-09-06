@@ -22,12 +22,13 @@
                     <field name="cantidad"/>
                     <field name="unitario"/>
                     <field name="costo"/>
-                    <field name="aprovacion" widget="boolean_toggle"/>
+                     <field name="permiso" invisible = "1"/>
+                    <field name="aprovacion" widget="boolean_toggle" attrs="{'invisible': [('permiso', '=', False)]}"/>
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <field name="observacion"/>
                     <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
-                            attrs="{'invisible': [('proveedor_id', '=', False),('codigo', '=', False)]}"/>
+                            attrs="{'invisible': [('aprovacion', '=', False)]}"/>
                 </tree>
             </field>
         </record>
