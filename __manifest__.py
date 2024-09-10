@@ -11,6 +11,7 @@
         'views/dtm_compras_requerido_views.xml',
         'views/dtm_compras_realizado_views.xml',
         'views/dtm_compras_odt_view.xml',
+        'views/dtm_compras_servicios_views.xml',
         #Menú
         'views/dtm_menu.xml'
 

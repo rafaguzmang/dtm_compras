@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="dtm_compras_servicios_action" model="ir.actions.act_window">
+            <field name="name">Servicios</field>
+            <field name="res_model">dtm.compras.servicios</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <record id="dtm_compras_servicios_tree" model="ir.ui.view">
+            <field name="name">dtm.compras.servicios.tree</field>
+            <field name="model">dtm.compras.servicios</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="nombre"/>
+                    <field name="cantidad"/>
+                    <field name="tipo_orden"/>
+                    <field name="numero_orden"/>
+                    <field name="proveedor"/>
+                    <field name="fecha_solicitud"/>
+                    <field name="fecha_compra"/>
+                    <field name="fecha_entrada"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="dtm_compras_servicios_form" model="ir.ui.view">
+            <field name="name">dtm.compras.servicios.form</field>
+            <field name="model">dtm.compras.servicios</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                            <field name="nombre"/>
+                            <field name="cantidad" options='{"type": "number"}'/>
+                            <field name="tipo_orden" options='{"type": "number"}'/>
+                            <field name="numero_orden" options='{"type": "number"}'/>
+                            <field name="proveedor"/>
+                            </group>
+                            <group>
+                                <field name="fecha_solicitud"/>
+                                <field name="fecha_compra"/>
+                                <field name="fecha_entrada"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Materiales">
+                                <field name="material_id">
+                                      <tree editable="bottom" >
+                                        <field name="materials_list"/>
+                                        <field name="materials_cuantity" options='{"type": "number"} ' attrs="{'invisible': [('materials_list', '=', False)]}"/>
+                                        <field name="materials_inventory"/>
+                                        <field name="materials_availabe"/>
+                                        <field name="materials_required" options='{"type": "number"}'/>
+                                        <field name="revicion"/>
+                                    </tree>
+                                </field>
+                            </page>
+                             <page string="Anexos">
+                                 <field name="anexos_id">
+                                    <tree>
+                                        <field name="name" invisible="0"></field>
+                                     </tree>
+                                     <form>
+                                        <group >
+                                            <field name="datas" filename="nombre" widget="pdf_viewer"></field>
+                                            <field name="name" invisible="1"></field>
+                                        </group>
+                                     </form>
+                                 </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+<!--        <menuitem id="dtm_compras_servicios_action_menu" action="dtm_compras.dtm_compras_servicios_action"/>-->
+    </data>
+</odoo>

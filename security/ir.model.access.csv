@@ -4,5 +4,7 @@ access_dtm_compras_realizado,access.dtm.compras.realizado,model_dtm_compras_real
 access_dtm_compras_proveedor,access.dtm.compras.proveedor,model_dtm_compras_proveedor,base.group_user,1,1,1,1
 access_dtm_compras_odt,access.dtm.compras.odt,model_dtm_compras_odt,base.group_user,1,1,1,1
 
+access_dtm_compras_servicios,access.dtm.compras.servicios,model_dtm_compras_servicios,base.group_user,1,1,1,1
+
 
 

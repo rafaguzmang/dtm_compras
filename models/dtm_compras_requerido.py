@@ -19,6 +19,8 @@ class Compras(models.Model):
     observacion = fields.Char(string="Observaciones")
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean()
+    servicio = fields.Boolean(string="Servicio",readonly=True)
+
 
     @api.depends("cantidad","unitario")
     def _compute_costo(self):
