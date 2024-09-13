@@ -12,6 +12,7 @@
             <field name="model">dtm.compras.requerido</field>
             <field name="arch" type="xml">
                 <tree  editable="bottom"  decoration-primary="orden_trabajo != False">
+                    <button name="action_enlace" type="object" string=""  icon="fa-link"/>
                     <field name="orden_trabajo"/>
                     <field name="create_date"/>
                     <field name="disenador"/>

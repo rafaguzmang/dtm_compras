@@ -21,6 +21,23 @@ class Compras(models.Model):
     permiso = fields.Boolean()
     servicio = fields.Boolean(string="Servicio",readonly=True)
 
+    def action_enlace(self):
+        get_id = self.env['dtm.proceso'].search([("ot_number","=",self.orden_trabajo)])
+        if len(get_id) == 1:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f'/web#id={get_id.id}&cids=2&menu_id=811&action=910&model=dtm.proceso&view_type=form',
+                # 'target': 'self',  # Abre la URL en la misma ventana
+            }
+        else:
+             return {
+                'type': 'ir.actions.act_url',
+                'url': f'/web#action=910&model=dtm.proceso&view_type=list&cids=2&menu_id=811',
+                # 'target': 'self',  # Abre la URL en la misma ventana
+            }
+
+
+
     @api.depends("cantidad","unitario")
     def _compute_costo(self):
         for result in self:
@@ -116,6 +133,8 @@ class Realizado(models.Model):
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Comprado")
     aprovacion = fields.Char(string="Aprovado",readonly = True)
+
+
 
 
     def get_view(self, view_id=None, view_type='form', **options):
