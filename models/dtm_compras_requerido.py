@@ -21,7 +21,6 @@ class Compras(models.Model):
     permiso = fields.Boolean()
     servicio = fields.Boolean(string="Servicio",readonly=True)
 
-
     @api.depends("cantidad","unitario")
     def _compute_costo(self):
         for result in self:
@@ -36,8 +35,8 @@ class Compras(models.Model):
                 "descripcion":self.nombre,
                 "cantidad":self.cantidad,
                 "fecha_recepcion":self.fecha_recepcion,
-                "unitario": self.unitario,
-                "aprovacion": self.aprovacion and "Aprobado",
+                # "unitario": self.unitario,
+                # "aprovacion": self.aprovacion and "Aprobado",
             }
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
                                                                    ("codigo","=",self.codigo)])
@@ -86,7 +85,6 @@ class Compras(models.Model):
                 #----------------------------------------------------------------------------------------------------------------------------------------------------
                 listcant = [self.env['dtm.materials.line'].search([("model_id","=",self.env['dtm.odt'].search([("ot_number","=",odt)]).id),("materials_list","=",material.codigo)]).materials_required for odt in listOdts]
                 listdis = set([self.env['dtm.odt'].search([("ot_number","=",odt)]).firma for odt in listOdts])
-
                 val = {
                     "orden_trabajo":odt,
                     "disenador":"".join(listdis),
