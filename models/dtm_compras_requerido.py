@@ -21,6 +21,22 @@ class Compras(models.Model):
     permiso = fields.Boolean()
     servicio = fields.Boolean(string="Servicio",readonly=True)
 
+    def action_enlace(self):
+        get_id = self.env['dtm.proceso'].search([("ot_number","=",self.orden_trabajo)])
+        if len(get_id) == 1:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f'/web#id={get_id.id}&cids=2&menu_id=811&action=910&model=dtm.proceso&view_type=form',
+                # 'target': 'self',  # Abre la URL en la misma ventana
+            }
+        else:
+             return {
+                'type': 'ir.actions.act_url',
+                'url': f'/web#action=910&model=dtm.proceso&view_type=list&cids=2&menu_id=811',
+                # 'target': 'self',  # Abre la URL en la misma ventana
+            }
+
+
 
     @api.depends("cantidad","unitario")
     def _compute_costo(self):
@@ -88,7 +104,6 @@ class Compras(models.Model):
                 #----------------------------------------------------------------------------------------------------------------------------------------------------
                 listcant = [self.env['dtm.materials.line'].search([("model_id","=",self.env['dtm.odt'].search([("ot_number","=",odt)]).id),("materials_list","=",material.codigo)]).materials_required for odt in listOdts]
                 listdis = set([self.env['dtm.odt'].search([("ot_number","=",odt)]).firma for odt in listOdts])
-
                 val = {
                     "orden_trabajo":odt,
                     "disenador":"".join(listdis),
@@ -119,6 +134,8 @@ class Realizado(models.Model):
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Comprado")
     aprovacion = fields.Char(string="Aprovado",readonly = True)
+
+
 
 
     def get_view(self, view_id=None, view_type='form', **options):
