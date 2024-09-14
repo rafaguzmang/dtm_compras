@@ -21,6 +21,7 @@ class Compras(models.Model):
     permiso = fields.Boolean()
     servicio = fields.Boolean(string="Servicio",readonly=True)
 
+
     def action_enlace(self):
         get_id = self.env['dtm.proceso'].search([("ot_number","=",self.orden_trabajo)])
         if len(get_id) == 1:
@@ -30,13 +31,12 @@ class Compras(models.Model):
                 # 'target': 'self',  # Abre la URL en la misma ventana
             }
         else:
-             return {
+
+            return {
                 'type': 'ir.actions.act_url',
-                'url': f'/web#action=910&model=dtm.proceso&view_type=list&cids=2&menu_id=811',
+                'url': f'/web#action=910&model=dtm.proceso&view_type=list&cids=2&menu_id=811&ordenes={self.orden_trabajo}',
                 # 'target': 'self',  # Abre la URL en la misma ventana
             }
-
-
 
     @api.depends("cantidad","unitario")
     def _compute_costo(self):
