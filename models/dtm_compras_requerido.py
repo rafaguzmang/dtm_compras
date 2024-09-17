@@ -55,8 +55,9 @@ class Compras(models.Model):
                 # "unitario": self.unitario,
                 # "aprovacion": self.aprovacion and "Aprobado",
             }
-            get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),
-                                                                   ("codigo","=",self.codigo)])
+            get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),("codigo","=",self.codigo)])
+            print(vals)
+            print(get_control)
             if not get_control:
                 get_control.create(vals)
             else:
@@ -77,6 +78,7 @@ class Compras(models.Model):
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras,self).get_view(view_id, view_type,**options)
         get_info = self.env['dtm.compras.requerido'].search([])
+
         # mapa = {}
         # for get in get_info:#Borra filas repetidas basadas en número de orden, codigo de material y cantidad
         #     cadena = str(get.orden_trabajo) + str(get.codigo) + get.nombre + str(get.cantidad)
@@ -112,7 +114,6 @@ class Compras(models.Model):
             else:
                 mapa2[material.codigo] = 1
                 material.nombre.find("Maquinado") != -1 and material.write({"servicio":True})
-
         return res
 
 
