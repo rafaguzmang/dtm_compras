@@ -111,6 +111,7 @@ class Compras(models.Model):
                 material.unlink()
             else:
                 mapa2[material.codigo] = 1
+                material.nombre.find("Maquinado") != -1 and material.write({"servicio":True})
 
         return res
 
