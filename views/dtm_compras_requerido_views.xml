@@ -41,6 +41,8 @@
                <search>
                     <field name="orden_trabajo"/>
                     <field name="codigo"/>
+                    <field name="nombre"/>
+                    <field name="proveedor_id"/>
                </search>
             </field>
         </record>
