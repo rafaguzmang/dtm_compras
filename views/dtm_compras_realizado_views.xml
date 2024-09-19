@@ -29,7 +29,7 @@
             <field name="name">dtm_compras_realizado_tree</field>
             <field name="model">dtm.compras.realizado</field>
             <field name="arch" type="xml">
-                <tree decoration-success="comprado=='Comprado'"
+                <tree delete="false" decoration-success="comprado=='Comprado'"
                         decoration-warning="comprado!='Comprado'"
                         decoration-danger="comprado=='Comprado' and cantidad &gt; cantidad_almacen">
                     <field name="orden_trabajo"/>
