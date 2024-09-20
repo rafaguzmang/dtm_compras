@@ -15,7 +15,7 @@ class Compras(models.Model):
     costo = fields.Float(string="Total", compute = "_compute_costo",store=True)
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
-    disenador = fields.Char(string="Diseñador")
+    disenador = fields.Char(string="SOLICITA")
     observacion = fields.Char(string="Observaciones")
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean()
@@ -133,11 +133,8 @@ class Realizado(models.Model):
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_compra = fields.Date(string="Fecha de compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
-    comprado = fields.Char(string="Comprado")
+    comprado = fields.Char(string="Recibido")
     aprovacion = fields.Char(string="Aprovado",readonly = True)
-
-
-
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado,self).get_view(view_id, view_type,**options)
