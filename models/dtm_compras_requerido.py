@@ -15,7 +15,7 @@ class Compras(models.Model):
     costo = fields.Float(string="Total", compute = "_compute_costo",store=True)
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
-    disenador = fields.Char(string="SOLICITA")
+    disenador = fields.Char(string="Solicita")
     observacion = fields.Char(string="Observaciones")
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean()
@@ -56,8 +56,8 @@ class Compras(models.Model):
                 # "aprovacion": self.aprovacion and "Aprobado",
             }
             get_control = self.env['dtm.control.entradas'].search([("descripcion","=",self.nombre),("proveedor","=",self.proveedor_id.nombre),("codigo","=",self.codigo)])
-            print(vals)
-            print(get_control)
+            # print(vals)
+            # print(get_control)
             if not get_control:
                 get_control.create(vals)
             else:
@@ -79,17 +79,10 @@ class Compras(models.Model):
         res = super(Compras,self).get_view(view_id, view_type,**options)
         get_info = self.env['dtm.compras.requerido'].search([])
 
-        # mapa = {}
-        # for get in get_info:#Borra filas repetidas basadas en número de orden, codigo de material y cantidad
-        #     cadena = str(get.orden_trabajo) + str(get.codigo) + get.nombre + str(get.cantidad)
-        #     if mapa.get(cadena):
-        #         mapa[cadena] = mapa.get(cadena) + 1
-        #         get.unlink()
-        #     else:
-        #         mapa[cadena] = 1
+        # Lógica para dar permisos de compra
         for result in get_info:
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",'ventas1@dtmindustry.com',"rafaguzmang@hotmail.com"] else False
-
+        # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa2 = {}
         for material in get_info:
             if mapa2.get(material.codigo):
@@ -114,6 +107,9 @@ class Compras(models.Model):
             else:
                 mapa2[material.codigo] = 1
                 material.nombre.find("Maquinado") != -1 and material.write({"servicio":True})
+            if len(material.orden_trabajo) > 3:
+                lista = list(filter(lambda orden: self.env['dtm.materials.line'].search([("model_id","=",self.env['dtm.odt'].search([("ot_number","=",orden)]).id),("materials_list","=",material.codigo)]).materials_required != 0, material.orden_trabajo.split() ))
+                material.write({"orden_trabajo":" ".join(lista)})
         return res
 
 
