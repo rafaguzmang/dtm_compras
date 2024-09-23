@@ -15,7 +15,7 @@ class Compras(models.Model):
     costo = fields.Float(string="Total", compute = "_compute_costo",store=True)
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
-    disenador = fields.Char(string="SOLICITA")
+    disenador = fields.Char(string="Solicita")
     observacion = fields.Char(string="Observaciones")
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean()
