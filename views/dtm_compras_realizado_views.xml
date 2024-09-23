@@ -18,8 +18,8 @@
                     <field name="nombre"/>
                     <field name="orden_compra"/>
                     <separator/>
-                    <filter string="Comprado" name="comprado" domain="[('comprado','!=',False)]"/>
-                    <filter string="No Comprado" name="no-comprado" domain="[('comprado','=',False)]"/>
+                    <filter string="Recibido" name="comprado" domain="[('comprado','!=',False)]"/>
+                    <filter string="No Recibido" name="no-comprado" domain="[('comprado','=',False)]"/>
 
                </search>
             </field>
