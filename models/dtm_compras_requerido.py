@@ -1,6 +1,8 @@
 from odoo import fields,models,api
 import datetime
 import re
+from odoo.exceptions import ValidationError, AccessError, MissingError,Warning
+
 
 class Compras(models.Model):
     _name = "dtm.compras.requerido"
@@ -8,14 +10,14 @@ class Compras(models.Model):
 
     orden_trabajo = fields.Char(string="ODT", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor",string="Proveedor")
-    codigo = fields.Integer(string="Codigo")
+    codigo = fields.Integer(string="Codigo",  readonly=True)
     nombre = fields.Char(string="Nombre", readonly = True)
     cantidad = fields.Integer(string="Cantidad",readonly=True)
     unitario = fields.Float(string="P.Unitario")
     costo = fields.Float(string="Total", compute = "_compute_costo",store=True)
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
-    disenador = fields.Char(string="Solicita")
+    disenador = fields.Char(string="Solicita", readonly=True)
     observacion = fields.Char(string="Observaciones")
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean()
@@ -45,7 +47,7 @@ class Compras(models.Model):
 
 
     def action_done(self):
-        if self.proveedor_id.nombre:
+        if self.proveedor_id.nombre and  self.unitario and self.orden_compra and self.fecha_recepcion:
             vals = {
                 "proveedor":self.proveedor_id.nombre,
                 "codigo":self.codigo,
@@ -73,7 +75,12 @@ class Compras(models.Model):
                                str( self.orden_trabajo)+"','"+self.proveedor_id.nombre+"', '"+str(self.codigo)+"','"+self.nombre+"',"+str(self.cantidad)+","+str(self.costo)+
                                 ", '"+str(datetime.datetime.today())+"','"+str(self.fecha_recepcion)+ "','"+str(self.orden_compra)+"')")
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id="+ str(self._origin.id))
-
+        else:
+            raise ValidationError("Campos obligatorios:\n"
+                                  "- Proveedor.\n"
+                                  "- Unitario.\n"
+                                  "- Orden de compra del proveedor.\n"
+                                  "- Fecha de recepción.\n")
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras,self).get_view(view_id, view_type,**options)
