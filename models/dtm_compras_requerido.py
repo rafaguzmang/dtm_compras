@@ -8,7 +8,7 @@ class Compras(models.Model):
     _name = "dtm.compras.requerido"
     _description = "Modulo de compras"
 
-    orden_trabajo = fields.Char(string="ODT", readonly=True)
+    orden_trabajo = fields.Char(string="ODT/Folio", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor", string="Proveedor")
     codigo = fields.Integer(string="Codigo", readonly=True)
     nombre = fields.Char(string="Nombre", readonly=True)
@@ -22,6 +22,13 @@ class Compras(models.Model):
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean()
     servicio = fields.Boolean(string="Servicio", readonly=True)
+
+    def _compute_permiso(self):
+        # Lógica para dar permisos de compra
+        for result in self:
+            result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
+                                                                          'ventas1@dtmindustry.com',
+                                                                          "rafaguzmang@hotmail.com"] else False
 
     def action_enlace(self):
         get_id = self.env['dtm.proceso'].search([("ot_number", "=", self.orden_trabajo)])
@@ -89,11 +96,6 @@ class Compras(models.Model):
         res = super(Compras, self).get_view(view_id, view_type, **options)
         get_info = self.env['dtm.compras.requerido'].search([])
 
-        # Lógica para dar permisos de compra
-        for result in get_info:
-            result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
-                                                                          'ventas1@dtmindustry.com',
-                                                                          "rafaguzmang@hotmail.com"] else False
         # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa2 = {}
         for material in get_info:
@@ -129,8 +131,18 @@ class Compras(models.Model):
                 material.write({"orden_trabajo": " ".join(lista)})
         # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
-            if not self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).id),('materials_list','=',orden.codigo)]):
-                orden.unlink()
+            get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]) else 0),('materials_list','=',orden.codigo)])
+            get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
+            get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
+            list_serv = []
+            [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
+            # print([list_serv.extend(lista) for lista in [item.material_id.materials_list.mapped('id') for item in get_serv]])
+            # print(list_serv)
+            # print(get_odt,get_req,"Código",orden.codigo,"ODT",orden.orden_trabajo,len(orden.orden_trabajo))
+            if len(orden.orden_trabajo) <= 3:
+                if not get_odt and not get_req and not orden.codigo in list_serv:
+                    orden.unlink()
+
         return res
 
 
