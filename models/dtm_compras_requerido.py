@@ -26,7 +26,6 @@ class Compras(models.Model):
     def _compute_permiso(self):
         # Lógica para dar permisos de compra
         for result in self:
-            print(result.env.user.partner_id.email)
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
                                                                           'ventas1@dtmindustry.com',
                                                                           "rafaguzmang@hotmail.com"] else False
