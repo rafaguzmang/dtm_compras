@@ -10,7 +10,7 @@
             <field name="name">dtm.compras.servicios.tree</field>
             <field name="model">dtm.compras.servicios</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree decoration-success="listo != False" decoration-bf="listo != False" >
                     <field name="nombre"/>
                     <field name="cantidad"/>
                     <field name="tipo_orden"/>
@@ -19,6 +19,8 @@
                     <field name="fecha_solicitud"/>
                     <field name="fecha_compra"/>
                     <field name="fecha_entrada"/>
+                    <field name="comprado"/>
+                    <field name="listo" invisible="1"/>
                 </tree>
             </field>
         </record>

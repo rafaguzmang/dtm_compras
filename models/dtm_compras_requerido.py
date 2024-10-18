@@ -22,6 +22,7 @@ class Compras(models.Model):
     aprovacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean(compute="_compute_permiso")
     servicio = fields.Boolean(string="Servicio", readonly=True)
+    listo = fields.Boolean()
 
     def _compute_permiso(self):
         # Lógica para dar permisos de compra
@@ -142,6 +143,13 @@ class Compras(models.Model):
                 # print(get_odt,get_req,"Código",orden.codigo,"ODT",orden.orden_trabajo,len(orden.orden_trabajo))
                 if not get_odt and not get_req and not orden.codigo in list_serv:
                     orden.unlink()
+
+        # Lógica para servicios con material comprados
+        get_servicios = self.env['dtm.compras.servicios'].search([("comprado","!=","Recibido")])
+        for servicio in get_servicios:
+            get_odt = self.env['dtm.compras.requerido'].search([('orden_trabajo','ilike',servicio.numero_orden),('nombre','ilike',servicio.nombre)])
+            get_odt and get_odt.write({"listo":servicio.listo})
+
         return res
 
 
