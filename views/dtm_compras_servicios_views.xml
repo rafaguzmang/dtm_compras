@@ -5,7 +5,9 @@
             <field name="name">Servicios</field>
             <field name="res_model">dtm.compras.servicios</field>
             <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_nocomprado_search': True}</field>
         </record>
+
         <record id="dtm_compras_servicios_tree" model="ir.ui.view">
             <field name="name">dtm.compras.servicios.tree</field>
             <field name="model">dtm.compras.servicios</field>
@@ -74,6 +76,22 @@
                         </notebook>
                     </sheet>
                 </form>
+            </field>
+        </record>
+
+        <record id = "dtm_compras_servicios_search" model="ir.ui.view">
+            <field name="name">dtm_compras_servicios_search</field>
+            <field name="model">dtm.compras.servicios</field>
+            <field name ="arch" type="xml">
+               <search >
+                    <field name="numero_orden"/>
+                    <field name="nombre"/>
+                    <field name="comprado"/>
+                    <separator/>
+                        <filter string="Recibido" name="comprado_search" domain="[('comprado','=','Recibido')]" />
+                        <filter string="No Recibido" name="nocomprado_search" domain="[('comprado','!=','Recibido')]" />
+
+               </search>
             </field>
         </record>
 
