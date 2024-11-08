@@ -32,7 +32,6 @@
                     <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
                             attrs="{'invisible': [('aprovacion', '=', False)]}"/>
                     <field name="listo" invisible="1"/>
-
                 </tree>
             </field>
         </record>
