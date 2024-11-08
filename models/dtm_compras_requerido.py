@@ -54,39 +54,49 @@ class Compras(models.Model):
             result.costo = result.cantidad * result.unitario
 
     def action_done(self):
+        # Pasa la información a compras realizado
         if self.proveedor_id.nombre and self.unitario and self.orden_compra and self.fecha_recepcion:
-            vals = {
-                "proveedor": self.proveedor_id.nombre,
-                "codigo": self.codigo,
-                "descripcion": self.nombre,
-                "cantidad": self.cantidad,
-                "fecha_recepcion": self.fecha_recepcion,
-                # "unitario": self.unitario,
-                # "aprovacion": self.aprovacion and "Aprobado",
-            }
-            get_control = self.env['dtm.control.entradas'].search(
-                [("descripcion", "=", self.nombre), ("proveedor", "=", self.proveedor_id.nombre),
-                 ("codigo", "=", self.codigo)])
-            # print(vals)
-            # print(get_control)
-            if not get_control:
-                get_control.create(vals)
-            else:
-                cantidad = 0
-                for get in get_control:
-                    cantidad += get.cantidad
-                vals = {
-                    "cantidad": cantidad + self.cantidad
-                }
-                get_control.write(vals)
-
-            self.env.cr.execute(
-                "INSERT INTO dtm_compras_realizado (orden_trabajo,proveedor,codigo,nombre,cantidad,costo,fecha_compra,fecha_recepcion,orden_compra) VALUES ('" +
-                str(self.orden_trabajo) + "','" + self.proveedor_id.nombre + "', '" + str(
-                    self.codigo) + "','" + self.nombre + "'," + str(self.cantidad) + "," + str(self.costo) +
-                ", '" + str(datetime.datetime.today()) + "','" + str(self.fecha_recepcion) + "','" + str(
-                    self.orden_compra) + "')")
-            self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
+            # vals = {
+            #     "proveedor": self.proveedor_id.nombre,
+            #     "codigo": self.codigo,
+            #     "descripcion": self.nombre,
+            #     "cantidad": self.cantidad,
+            #     "fecha_recepcion": self.fecha_recepcion,
+            #     # "unitario": self.unitario,
+            #     # "aprovacion": self.aprovacion and "Aprobado",
+            # }
+            # get_control = self.env['dtm.control.entradas'].search(
+            #     [("descripcion", "=", self.nombre), ("proveedor", "=", self.proveedor_id.nombre),
+            #      ("codigo", "=", self.codigo)])
+            # # print(vals)
+            # # print(get_control)
+            # if not get_control:
+            #     get_control.create(vals)
+            # else:
+            #     cantidad = 0
+            #     for get in get_control:
+            #         cantidad += get.cantidad
+            #     vals = {
+            #         "cantidad": cantidad + self.cantidad
+            #     }
+            #     get_control.write(vals)
+            #
+            # self.env.cr.execute(
+            #     "INSERT INTO dtm_compras_realizado (orden_trabajo,proveedor,codigo,nombre,cantidad,costo,fecha_compra,fecha_recepcion,orden_compra) VALUES ('" +
+            #     str(self.orden_trabajo) + "','" + self.proveedor_id.nombre + "', '" + str(
+            #         self.codigo) + "','" + self.nombre + "'," + str(self.cantidad) + "," + str(self.costo) +
+            #     ", '" + str(datetime.datetime.today()) + "','" + str(self.fecha_recepcion) + "','" + str(
+            #         self.orden_compra) + "')")
+            # self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
+            print(self.codigo)
+            get_material = self.env['dtm.materials.line'].search([("materials_list","=",self.codigo)])
+            print(get_material)
+            if get_material:
+                for material in get_material:
+                    material.write({
+                                        "comprado":True,
+                                        "revicion":False
+                                    })
         else:
             raise ValidationError("Campos obligatorios:\n"
                                   "- Proveedor.\n"
@@ -112,9 +122,9 @@ class Compras(models.Model):
                 listOdts = set(odt.split(" "))
                 # ----------------------------------------------------------------------------------------------------------------------------------------------------
                 listcant = [self.env['dtm.materials.line'].search(
-                    [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", odt)]).id),
+                    [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", odt),("tipe_order", "!=", 'PD')]).id),
                      ("materials_list", "=", material.codigo)]).materials_required for odt in listOdts]
-                listdis = set([self.env['dtm.odt'].search([("ot_number", "=", odt)]).firma for odt in listOdts])
+                listdis = set([self.env['dtm.odt'].search([("ot_number", "=", odt),("tipe_order", "!=", 'PD')]).firma for odt in listOdts])
                 val = {
                     "orden_trabajo": odt,
                     "disenador": "".join(listdis),
@@ -127,14 +137,13 @@ class Compras(models.Model):
                 material.nombre.find("Maquinado") != -1 and material.write({"servicio": True})
             if len(material.orden_trabajo) > 3:
                 lista = list(filter(lambda orden: self.env['dtm.materials.line'].search(
-                    [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", orden)]).id),
+                    [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", orden),("tipe_order", "!=", 'PD')]).id),
                      ("materials_list", "=", material.codigo)]).materials_required != 0,
                                     material.orden_trabajo.split()))
                 material.write({"orden_trabajo": " ".join(lista)})
         # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
             if len(orden.orden_trabajo) <= 3:
-
                 get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]) else 0),('materials_list','=',orden.codigo)])
                 get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
                 get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
@@ -150,7 +159,7 @@ class Compras(models.Model):
         get_servicios = self.env['dtm.compras.servicios'].search([("comprado","!=","Recibido")])
         for servicio in get_servicios:
             get_odt = self.env['dtm.compras.requerido'].search([('orden_trabajo','ilike',servicio.numero_orden),('nombre','ilike',servicio.nombre),('servicio','=',True)])
-            print(get_odt)
+
             get_odt and get_odt.write({"listo":servicio.listo})
 
         return res
