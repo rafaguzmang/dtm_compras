@@ -9,6 +9,7 @@ class Compras(models.Model):
     _description = "Modulo de compras"
 
     orden_trabajo = fields.Char(string="ODT/Folio", readonly=True)
+    tipo_orden = fields.Char(string="Tipo", readonly=True)
     proveedor_id = fields.Many2one("dtm.compras.proveedor", string="Proveedor")
     codigo = fields.Integer(string="Codigo", readonly=True)
     nombre = fields.Char(string="Nombre", readonly=True)
@@ -133,7 +134,8 @@ class Compras(models.Model):
         # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
             if len(orden.orden_trabajo) <= 3:
-                get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)],limit=1).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]) else 0),('materials_list','=',orden.codigo)])
+
+                get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]) else 0),('materials_list','=',orden.codigo)])
                 get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
                 get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
                 list_serv = []
@@ -147,7 +149,8 @@ class Compras(models.Model):
         # Lógica para servicios con material comprados
         get_servicios = self.env['dtm.compras.servicios'].search([("comprado","!=","Recibido")])
         for servicio in get_servicios:
-            get_odt = self.env['dtm.compras.requerido'].search([('orden_trabajo','ilike',servicio.numero_orden),('nombre','ilike',servicio.nombre)])
+            get_odt = self.env['dtm.compras.requerido'].search([('orden_trabajo','ilike',servicio.numero_orden),('nombre','ilike',servicio.nombre),('servicio','=',True)])
+            print(get_odt)
             get_odt and get_odt.write({"listo":servicio.listo})
 
         return res
