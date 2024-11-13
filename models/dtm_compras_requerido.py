@@ -123,7 +123,7 @@ class Compras(models.Model):
                 listOdts = set(odt.split(" "))
                 # ----------------------------------------------------------------------------------------------------------------------------------------------------
                 listcant = [self.env['dtm.materials.line'].search(
-                    [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", odt)]).id),
+                    [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", odt),("tipe_order", "!=", 'PD')]).id),
                      ("materials_list", "=", material.codigo)]).materials_required for odt in listOdts]
                 listdis = set([self.env['dtm.odt'].search([("ot_number", "=", odt)]).firma for odt in listOdts])
                 val = {
