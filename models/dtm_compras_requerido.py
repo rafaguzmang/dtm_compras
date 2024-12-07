@@ -107,27 +107,31 @@ class Compras(models.Model):
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras, self).get_view(view_id, view_type, **options)
         get_info = self.env['dtm.compras.requerido'].search([])
-
+        print(get_info)
         # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa2 = {}
         for material in get_info:
+            print(material)
             if mapa2.get(material.codigo):
                 mapa2[material.codigo] = mapa2.get(material.codigo) + 1
                 get_col = self.env['dtm.compras.requerido'].search([('codigo', '=', material.codigo)], order='id asc',limit=1)
                 odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
+                print(odt)
                 # -------------------------------------- Lógica para obtener las ordenes de trabajo separadas y evitar que las peticiones muten ----------------------
                 listOdts = set(odt.split(" "))
                 odt = ",".join(listOdts)
                 odt = re.sub(",", " ", odt)
                 listOdts = set(odt.split(" "))
                 # ----------------------------------------------------------------------------------------------------------------------------------------------------
+                print('listOdts',listOdts)
                 listcant = [self.env['dtm.materials.line'].search(
                     [("model_id", "=", self.env['dtm.odt'].search([("ot_number", "=", odt),("tipe_order", "!=", 'PD')]).id),
                      ("materials_list", "=", material.codigo)]).materials_required for odt in listOdts]
                 listdis = set([self.env['dtm.odt'].search([("ot_number", "=", odt),("tipe_order", "!=", 'PD')]).firma for odt in listOdts])
+                print("".join(listdis))
                 val = {
                     "orden_trabajo": odt,
-                    "disenador": "".join(listdis),
+                    "disenador": "".join(listdis) if "".join(listdis) else '',
                     "cantidad": sum(listcant),
                 }
                 get_col.write(val)
