@@ -17,6 +17,7 @@ class Compras(models.Model):
     unitario = fields.Float(string="P.Unitario")
     costo = fields.Float(string="Total", compute="_compute_costo", store=True)
     orden_compra = fields.Char(string="Orden de Compra")
+
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
     disenador = fields.Char(string="Solicita", readonly=True)
     observacion = fields.Char(string="Observaciones")
@@ -88,9 +89,10 @@ class Compras(models.Model):
                 ", '" + str(datetime.datetime.today()) + "','" + str(self.fecha_recepcion) + "','" + str(
                     self.orden_compra) + "')")
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
-            print(self.codigo)
-            get_material = self.env['dtm.materials.line'].search([("materials_list","=",self.codigo)])
-            print(get_material)
+            # Indica que el material se ha pedido
+            # obtiene el id de la orden de trabajo
+            get_orden = self.env['dtm.odt'].search([('ot_number','=',int(self.orden_trabajo))])
+            get_material = self.env['dtm.materials.line'].search([('model_id','=',get_orden.id),("materials_list","=",self.codigo)])
             if get_material:
                 for material in get_material:
                     material.write({
@@ -111,12 +113,12 @@ class Compras(models.Model):
         # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa2 = {}
         for material in get_info:
-            print(material)
+
             if mapa2.get(material.codigo):
                 mapa2[material.codigo] = mapa2.get(material.codigo) + 1
                 get_col = self.env['dtm.compras.requerido'].search([('codigo', '=', material.codigo)], order='id asc',limit=1)
                 odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
-                print(odt)
+
                 # -------------------------------------- Lógica para obtener las ordenes de trabajo separadas y evitar que las peticiones muten ----------------------
                 listOdts = set(odt.split(" "))
                 odt = ",".join(listOdts)
