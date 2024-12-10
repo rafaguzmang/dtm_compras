@@ -62,6 +62,7 @@ class Compras(models.Model):
                 "descripcion": self.nombre,
                 "cantidad": self.cantidad,
                 "fecha_recepcion": self.fecha_recepcion,
+                "orden_trabajo": self.orden_trabajo
                 # "unitario": self.unitario,
                 # "aprovacion": self.aprovacion and "Aprobado",
             }
