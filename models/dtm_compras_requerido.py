@@ -91,14 +91,27 @@ class Compras(models.Model):
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
             # Indica que el material se ha pedido
             # obtiene el id de la orden de trabajo
-            get_orden = self.env['dtm.odt'].search([('ot_number','=',int(self.orden_trabajo))])
-            get_material = self.env['dtm.materials.line'].search([('model_id','=',get_orden.id),("materials_list","=",self.codigo)])
-            if get_material:
-                for material in get_material:
-                    material.write({
-                                        "comprado":True,
-                                        "revicion":False
-                                    })
+            if len(self.orden_trabajo)< 4 :
+                get_orden = self.env['dtm.odt'].search([('ot_number','=',int(self.orden_trabajo))])
+                get_material = self.env['dtm.materials.line'].search([('model_id','=',get_orden.id),("materials_list","=",self.codigo)])
+                if get_material:
+                    for material in get_material:
+                        material.write({
+                                            "comprado":True,
+                                            "revicion":False
+                                        })
+            else:
+                ordenes = self.orden_trabajo.split(" ")
+                for orden in ordenes:
+                    get_orden = self.env['dtm.odt'].search([('ot_number','=',int(orden))])
+                    get_material = self.env['dtm.materials.line'].search([('model_id','=',get_orden.id),("materials_list","=",self.codigo)])
+                    if get_material:
+                        for material in get_material:
+                            material.write({
+                                                "comprado":True,
+                                                "revicion":False
+                                            })
+
         else:
             raise ValidationError("Campos obligatorios:\n"
                                   "- Proveedor.\n"
@@ -113,12 +126,13 @@ class Compras(models.Model):
         # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa2 = {}
         for material in get_info:
-            # print(material)
+            # Busca items repetidos
             if mapa2.get(material.codigo):
+                print(material.codigo)
                 mapa2[material.codigo] = mapa2.get(material.codigo) + 1
                 get_col = self.env['dtm.compras.requerido'].search([('codigo', '=', material.codigo)], order='id asc',limit=1)
                 odt = f"{get_col.orden_trabajo} {material.orden_trabajo}"
-                # print(odt)
+                print(get_col)
                 # -------------------------------------- Lógica para obtener las ordenes de trabajo separadas y evitar que las peticiones muten ----------------------
                 listOdts = set(odt.split(" "))
                 odt = ",".join(listOdts)
@@ -191,14 +205,14 @@ class Realizado(models.Model):
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado, self).get_view(view_id, view_type, **options)
 
-        get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
-        ordenes_list = set(list(filter(lambda x: len(x) < 4, get_self)))
-        get_facturado = self.env['dtm.facturado.odt'].search([]).mapped('ot_number')
-        [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo", "=", odt)]).unlink()
-         for odt in ordenes_list]
-        get_facturado = self.env['dtm.facturado.npi'].search([]).mapped('ot_number')
-        [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo", "=", odt)]).unlink()
-         for odt in ordenes_list]
+        # get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
+        # ordenes_list = set(list(filter(lambda x: len(x) < 4, get_self)))
+        # get_facturado = self.env['dtm.facturado.odt'].search([]).mapped('ot_number')
+        # [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo", "=", odt)]).unlink()
+        #  for odt in ordenes_list]
+        # get_facturado = self.env['dtm.facturado.npi'].search([]).mapped('ot_number')
+        # [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo", "=", odt)]).unlink()
+        #  for odt in ordenes_list]
 
         return res
 
