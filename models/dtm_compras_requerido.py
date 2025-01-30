@@ -145,7 +145,9 @@ class Compras(models.Model):
                     get_new.write({'cantidad':sum(get_col.mapped('cantidad')),'disenador':" ".join(list(set(get_col.mapped('disenador')))),'servicio': True if True in get_col.mapped('servicio') else False})
                 else:
                     get_new.create({'orden_trabajo':" ".join(get_col.mapped('orden_trabajo')),'cantidad':sum(get_col.mapped('cantidad')),
-                                    'disenador':" ".join(list(set(get_col.mapped('disenador')))),'servicio': True if True in get_col.mapped('servicio') else False })
+                                    'disenador':" ".join(list(set(get_col.mapped('disenador')))),'servicio': True if True in get_col.mapped('servicio') else False,
+                                    'codigo':item,'nombre':get_col.mapped('nombre')[0]
+                                    })
                 get_col.unlink()
 
 
