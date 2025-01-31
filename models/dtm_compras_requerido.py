@@ -148,7 +148,7 @@ class Compras(models.Model):
                                     'disenador':" ".join(list(set(get_col.mapped('disenador')))),'servicio': True if True in get_col.mapped('servicio') else False,
                                     'codigo':item,'nombre':get_col.mapped('nombre')[0]
                                     })
-                get_col.unlink()
+                # get_col.unlink()
 
 
 
