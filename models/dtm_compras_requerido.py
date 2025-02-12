@@ -31,7 +31,7 @@ class Compras(models.Model):
         for result in self:
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
                                                                           'ventas1@dtmindustry.com',
-                                                                          "rafaguzmang@hotmail.com"] else False
+                                                                          "rafaguzmang@hotmail.com","calidad2@dtmindustry.com"] else False
 
     def action_enlace(self):
         get_id = self.env['dtm.proceso'].search([("ot_number", "=", self.orden_trabajo)])
@@ -135,20 +135,42 @@ class Compras(models.Model):
                 repeList.append(material.codigo)
             else:
                 mapa_repe[material.codigo] = 1
-
         if repeList:
             for item in list(set(repeList)):
                 get_col = self.env['dtm.compras.requerido'].search([('codigo','=',item)])
-                print(sum(get_col.mapped('cantidad'))," ".join(get_col.mapped('orden_trabajo'))," ".join(list(set(get_col.mapped('disenador')))),get_col.mapped('servicio'))
-                get_new = self.env['dtm.compras.requerido'].search([('orden_trabajo','='," ".join(get_col.mapped('orden_trabajo')))])
+
+                lista_ordenes = " ".join(list(set([num for elem in get_col.mapped('orden_trabajo') for num in elem.split()])))
+                suma = 0
+                disenador = " ".join(list(set(get_col.mapped('disenador'))))
+                servicio =  True if True in get_col.mapped('servicio') else False
+                nombre = get_col.mapped('nombre')[0]
+                for orden in lista_ordenes.split():
+                    get_servicios = self.env['dtm.odt'].search([('ot_number','=',orden)]).maquinados_id
+                    servicio = 0
+                    # Busca el servicio que contiene el material en caso de que sea un servicio
+                    for serv in get_servicios:
+                        for material in serv.material_id:
+                            if material.materials_list.id == item:
+                                servicio = serv.id
+                    # Busca el material en caso de que sea un material
+                    if self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden)]).id),('materials_list','=',item)]):
+                        suma += sum(self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden)]).id),('materials_list','=',item)]).mapped('materials_required'))
+                    if servicio != 0:
+                        suma += sum(self.env['dtm.materials.line'].search([('servicio_id','=',servicio),('materials_list','=',item)]).mapped('materials_required'))
+                get_col.unlink()
+                get_new = self.env['dtm.compras.requerido'].search([('orden_trabajo','=',lista_ordenes)])
+                # print(suma,disenador,servicio,item,nombre)
                 if get_new:
-                    get_new.write({'cantidad':sum(get_col.mapped('cantidad')),'disenador':" ".join(list(set(get_col.mapped('disenador')))),'servicio': True if True in get_col.mapped('servicio') else False})
-                else:
-                    get_new.create({'orden_trabajo':" ".join(get_col.mapped('orden_trabajo')),'cantidad':sum(get_col.mapped('cantidad')),
-                                    'disenador':" ".join(list(set(get_col.mapped('disenador')))),'servicio': True if True in get_col.mapped('servicio') else False,
-                                    'codigo':item,'nombre':get_col.mapped('nombre')[0]
+                    get_new.write({'cantidad':suma,
+                                    'disenador':disenador,'servicio': servicio,
+                                    'codigo':item,'nombre':nombre
                                     })
-                # get_col.unlink()
+                else:
+                    get_new.create({'orden_trabajo':lista_ordenes,'cantidad':suma,
+                                    'disenador':disenador,'servicio': servicio,
+                                    'codigo':item,'nombre':nombre
+                                    })
+
 
 
 
