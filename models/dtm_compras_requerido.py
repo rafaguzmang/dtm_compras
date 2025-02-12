@@ -157,8 +157,8 @@ class Compras(models.Model):
                         suma += sum(self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden)]).id),('materials_list','=',item)]).mapped('materials_required'))
                     if servicio != 0:
                         suma += sum(self.env['dtm.materials.line'].search([('servicio_id','=',servicio),('materials_list','=',item)]).mapped('materials_required'))
-                get_col.unlink()
-                get_new = self.env['dtm.compras.requerido'].search([('orden_trabajo','=',lista_ordenes)])
+                print(item,lista_ordenes,nombre,disenador,servicio,suma)
+                get_new = self.env['dtm.compras.requerido'].search([('orden_trabajo','=',lista_ordenes),('codigo','=',item)])
                 # print(suma,disenador,servicio,item,nombre)
                 if get_new:
                     get_new.write({'cantidad':suma,
@@ -171,6 +171,16 @@ class Compras(models.Model):
                                     'codigo':item,'nombre':nombre
                                     })
 
+                get_old = self.env['dtm.compras.requerido'].search([('codigo','=',item)])
+                maxleng_list = get_old.mapped('orden_trabajo')
+                print(maxleng_list)
+                print(len(max(maxleng_list)))
+                for orden in get_old:
+                    if len(orden.orden_trabajo) < len(max(maxleng_list)):
+                        print(orden.orden_trabajo)
+                        orden.unlink()
+
+                print('------------------------------------')
 
 
 
