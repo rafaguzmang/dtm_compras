@@ -185,9 +185,9 @@ class Compras(models.Model):
                 get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
                 list_serv = []
                 [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
-                print([list_serv.extend(lista) for lista in [item.material_id.materials_list.mapped('id') for item in get_serv]])
-                print(list_serv)
-                print(get_odt,get_req,"Código",orden.codigo,"ODT",orden.orden_trabajo,len(orden.orden_trabajo))
+                # print([list_serv.extend(lista) for lista in [item.material_id.materials_list.mapped('id') for item in get_serv]])
+                # print(list_serv)
+                # print(get_odt,get_req,"Código",orden.codigo,"ODT",orden.orden_trabajo,len(orden.orden_trabajo))
                 if not get_odt and not get_req and not orden.codigo in list_serv:
                     orden.unlink()
         return res
