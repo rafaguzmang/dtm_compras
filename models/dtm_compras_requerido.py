@@ -17,7 +17,6 @@ class Compras(models.Model):
     unitario = fields.Float(string="P.Unitario")
     costo = fields.Float(string="Total", compute="_compute_costo", store=True)
     orden_compra = fields.Char(string="Orden de Compra")
-
     fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
     disenador = fields.Char(string="Solicita", readonly=True)
     observacion = fields.Char(string="Observaciones")
@@ -77,7 +76,6 @@ class Compras(models.Model):
             else:
                 cantidad = 0
                 for get in get_control:
-                    # print(get.cantidad_real)
                     cantidad += get.cantidad
                 vals = {
                     "cantidad": cantidad + self.cantidad
@@ -121,16 +119,22 @@ class Compras(models.Model):
                                   "- Orden de compra del proveedor.\n"
                                   "- Fecha de recepción.\n")
 
-
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras, self).get_view(view_id, view_type, **options)
         get_info = self.env['dtm.compras.requerido'].search([])
 
+        orden_map = {}
+        for orden in get_info:
+            orden_cons = " ".join(sorted(str(orden.orden_trabajo).split(' ')))
+            if orden_map.get(f"{orden_cons}-{orden.codigo}"):
+                orden.unlink()
+            else:
+                orden_map[f"{orden_cons}-{orden.codigo}"] = 1
+
         # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa_repe = {}
         repeList = []
-        for material in get_info:
-
+        for material in get_info:#Quita materiales repetidos
             if mapa_repe.get(material.codigo):
                 repeList.append(material.codigo)
             else:
@@ -138,7 +142,6 @@ class Compras(models.Model):
         if repeList:
             for item in list(set(repeList)):
                 get_col = self.env['dtm.compras.requerido'].search([('codigo','=',item)])
-
                 lista_ordenes = " ".join(list(set([num for elem in get_col.mapped('orden_trabajo') for num in elem.split()])))
                 suma = 0
                 disenador = " ".join(list(set(get_col.mapped('disenador'))))
