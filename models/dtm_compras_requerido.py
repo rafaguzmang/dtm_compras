@@ -123,10 +123,18 @@ class Compras(models.Model):
         res = super(Compras, self).get_view(view_id, view_type, **options)
         get_info = self.env['dtm.compras.requerido'].search([])
 
+        orden_map = {}
+        for orden in get_info:
+            orden_cons = " ".join(sorted(str(orden.orden_trabajo).split(' ')))
+            if orden_map.get(f"{orden_cons}-{orden.codigo}"):
+                orden.unlink()
+            else:
+                orden_map[f"{orden_cons}-{orden.codigo}"] = 1
+
         # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
         mapa_repe = {}
         repeList = []
-        for material in get_info:
+        for material in get_info:#Quita materiales repetidos
             if mapa_repe.get(material.codigo):
                 repeList.append(material.codigo)
             else:
@@ -171,9 +179,11 @@ class Compras(models.Model):
                 # print(maxleng_list)
                 # print(len(max(maxleng_list)))
                 for orden in get_old:
+                    print(len(orden.orden_trabajo), len(max(maxleng_list)))
                     if len(orden.orden_trabajo) < len(max(maxleng_list)):
-                        # print(orden.orden_trabajo)
                         orden.unlink()
+
+
 
                 # print('------------------------------------')
 
