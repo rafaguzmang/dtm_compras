@@ -30,7 +30,7 @@ class Compras(models.Model):
         for result in self:
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
                                                                           'ventas1@dtmindustry.com',
-                                                                          "rafaguzmang@hotmail.com","calidad2@dtmindustry.com"] else False
+                                                                          "rafaguzmang@hotmail.com"] else False
 
     def action_enlace(self):
         get_id = self.env['dtm.proceso'].search([("ot_number", "=", self.orden_trabajo)])
@@ -179,9 +179,11 @@ class Compras(models.Model):
                 # print(maxleng_list)
                 # print(len(max(maxleng_list)))
                 for orden in get_old:
+                    print(len(orden.orden_trabajo), len(max(maxleng_list)))
                     if len(orden.orden_trabajo) < len(max(maxleng_list)):
-                        # print(orden.orden_trabajo)
                         orden.unlink()
+
+
 
                 # print('------------------------------------')
 
