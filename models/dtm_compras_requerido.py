@@ -123,70 +123,6 @@ class Compras(models.Model):
         res = super(Compras, self).get_view(view_id, view_type, **options)
         get_info = self.env['dtm.compras.requerido'].search([])
 
-        orden_map = {}
-        for orden in get_info:
-            orden_cons = " ".join(sorted(str(orden.orden_trabajo).split(' ')))
-            if orden_map.get(f"{orden_cons}-{orden.codigo}"):
-                orden.unlink()
-            else:
-                orden_map[f"{orden_cons}-{orden.codigo}"] = 1
-
-        # Lógica para detectar materiales solicitados por varias Ordenes, suma el total de todas ellas
-        mapa_repe = {}
-        repeList = []
-        for material in get_info:#Quita materiales repetidos
-            if mapa_repe.get(material.codigo):
-                repeList.append(material.codigo)
-            else:
-                mapa_repe[material.codigo] = 1
-        if repeList:
-            for item in list(set(repeList)):
-                get_col = self.env['dtm.compras.requerido'].search([('codigo','=',item)])
-                lista_ordenes = " ".join(list(set([num for elem in get_col.mapped('orden_trabajo') for num in elem.split()])))
-                suma = 0
-                disenador = " ".join(list(set(get_col.mapped('disenador'))))
-                servicio =  True if True in get_col.mapped('servicio') else False
-                nombre = get_col.mapped('nombre')[0]
-                for orden in lista_ordenes.split():
-                    get_servicios = self.env['dtm.odt'].search([('ot_number','=',orden)]).maquinados_id
-                    servicio = 0
-                    # Busca el servicio que contiene el material en caso de que sea un servicio
-                    for serv in get_servicios:
-                        for material in serv.material_id:
-                            if material.materials_list.id == item:
-                                servicio = serv.id
-                    # Busca el material en caso de que sea un material
-                    if self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden)]).id),('materials_list','=',item)]):
-                        suma += sum(self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden)]).id),('materials_list','=',item)]).mapped('materials_required'))
-                    if servicio != 0:
-                        suma += sum(self.env['dtm.materials.line'].search([('servicio_id','=',servicio),('materials_list','=',item)]).mapped('materials_required'))
-                # print(item,lista_ordenes,nombre,disenador,servicio,suma)
-                get_new = self.env['dtm.compras.requerido'].search([('orden_trabajo','=',lista_ordenes),('codigo','=',item)])
-                # print(suma,disenador,servicio,item,nombre)
-                if get_new:
-                    get_new.write({'cantidad':suma,
-                                    'disenador':disenador,'servicio': servicio,
-                                    'codigo':item,'nombre':nombre
-                                    })
-                else:
-                    get_new.create({'orden_trabajo':lista_ordenes,'cantidad':suma,
-                                    'disenador':disenador,'servicio': servicio,
-                                    'codigo':item,'nombre':nombre
-                                    })
-
-                get_old = self.env['dtm.compras.requerido'].search([('codigo','=',item)])
-                maxleng_list = get_old.mapped('orden_trabajo')
-                # print(maxleng_list)
-                # print(len(max(maxleng_list)))
-                for orden in get_old:
-                    print(len(orden.orden_trabajo), len(max(maxleng_list)))
-                    if len(orden.orden_trabajo) < len(max(maxleng_list)):
-                        orden.unlink()
-
-
-
-                # print('------------------------------------')
-
          # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
             if len(orden.orden_trabajo) <= 3:
@@ -195,9 +131,7 @@ class Compras(models.Model):
                 get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
                 list_serv = []
                 [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
-                # print([list_serv.extend(lista) for lista in [item.material_id.materials_list.mapped('id') for item in get_serv]])
-                # print(list_serv)
-                # print(get_odt,get_req,"Código",orden.codigo,"ODT",orden.orden_trabajo,len(orden.orden_trabajo))
+
                 if not get_odt and not get_req and not orden.codigo in list_serv:
                     orden.unlink()
         return res
