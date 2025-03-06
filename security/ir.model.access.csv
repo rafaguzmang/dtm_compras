@@ -6,5 +6,7 @@ access_dtm_compras_odt,access.dtm.compras.odt,model_dtm_compras_odt,base.group_u
 
 access_dtm_compras_servicios,access.dtm.compras.servicios,model_dtm_compras_servicios,base.group_user,1,1,1,1
 
+access_dtm_compras_precios,access.dtm.compras.precios,model_dtm_compras_precios,base.group_user,1,1,1,1
+
 
 

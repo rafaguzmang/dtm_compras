@@ -25,6 +25,10 @@ class Compras(models.Model):
     servicio = fields.Boolean(string="Servicio", readonly=True)
     listo = fields.Boolean()
 
+    def action_devolver(self):
+        self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',self.orden_trabajo)]).id),('materials_list','=',self.codigo)]).write({'comprado':False})
+
+
     def _compute_permiso(self):
         # Lógica para dar permisos de compra
         for result in self:
@@ -83,35 +87,20 @@ class Compras(models.Model):
                 }
                 get_control.write(vals)
 
-            self.env.cr.execute(
-                "INSERT INTO dtm_compras_realizado (orden_trabajo,proveedor,codigo,nombre,cantidad,costo,fecha_compra,fecha_recepcion,orden_compra) VALUES ('" +
-                str(self.orden_trabajo) + "','" + self.proveedor_id.nombre + "', '" + str(
-                    self.codigo) + "','" + self.nombre + "'," + str(self.cantidad) + "," + str(self.costo) +
-                ", '" + str(datetime.datetime.today()) + "','" + str(self.fecha_recepcion) + "','" + str(
-                    self.orden_compra) + "')")
+
+            self.env['dtm.compras.realizado'].create({
+                'orden_trabajo': self.orden_trabajo,
+                'proveedor': self.proveedor_id.nombre,
+                'codigo': self.codigo,
+                'nombre': self.nombre,
+                'cantidad': self.cantidad,
+                'costo': self.costo,
+                'unitario':self.unitario,
+                'fecha_compra': datetime.datetime.today(),
+                'fecha_recepcion': self.fecha_recepcion,
+                'orden_compra': self.orden_compra,
+            })
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
-            # Indica que el material se ha pedido
-            # obtiene el id de la orden de trabajo
-            if len(self.orden_trabajo)< 4 :
-                get_orden = self.env['dtm.odt'].search([('ot_number','=',int(self.orden_trabajo))])
-                get_material = self.env['dtm.materials.line'].search([('model_id','=',get_orden.id),("materials_list","=",self.codigo)])
-                if get_material:
-                    for material in get_material:
-                        material.write({
-                                            "comprado":True,
-                                            "revicion":False
-                                        })
-            else:
-                ordenes = self.orden_trabajo.split(" ")
-                for orden in ordenes:
-                    get_orden = self.env['dtm.odt'].search([('ot_number','=',int(orden))])
-                    get_material = self.env['dtm.materials.line'].search([('model_id','=',get_orden.id),("materials_list","=",self.codigo)])
-                    if get_material:
-                        for material in get_material:
-                            material.write({
-                                                "comprado":True,
-                                                "revicion":False
-                                            })
 
         else:
             raise ValidationError("Campos obligatorios:\n"
@@ -159,6 +148,10 @@ class Realizado(models.Model):
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado, self).get_view(view_id, view_type, **options)
+
+        get_this = self.env['dtm.compras.realizado'].search([])
+        for row in get_this:
+            row.cantidad > 0 and row.write({'unitario':row.costo/row.cantidad})
 
         # get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
         # ordenes_list = set(list(filter(lambda x: len(x) < 4, get_self)))
