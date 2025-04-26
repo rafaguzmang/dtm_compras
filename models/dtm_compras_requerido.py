@@ -26,8 +26,7 @@ class Compras(models.Model):
     listo = fields.Boolean()
 
     def action_devolver(self):
-        self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',self.orden_trabajo)]).id),('materials_list','=',self.codigo)]).write({'comprado':False})
-
+        self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',self.orden_trabajo)]).id),('materials_list','=',self.codigo)]).write({'revision':False})
 
     def _compute_permiso(self):
         # Lógica para dar permisos de compra
@@ -36,7 +35,6 @@ class Compras(models.Model):
                                                                           'ventas1@dtmindustry.com',
                                                                           "rafaguzmang@hotmail.com",
                                                                           "calidad2@dtmindustry.com"] else False
-
     def action_enlace(self):
         get_id = self.env['dtm.proceso'].search([("ot_number", "=", self.orden_trabajo)])
         if len(get_id) == 1:
