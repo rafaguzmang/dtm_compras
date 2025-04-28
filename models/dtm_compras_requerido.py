@@ -44,7 +44,6 @@ class Compras(models.Model):
                 # 'target': 'self',  # Abre la URL en la misma ventana
             }
         else:
-
             return {
                 'type': 'ir.actions.act_url',
                 'url': f'/web#action=910&model=dtm.proceso&view_type=list&cids=2&menu_id=811&ordenes={self.orden_trabajo}',
@@ -113,14 +112,15 @@ class Compras(models.Model):
 
          # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
-                get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]) else 0),('materials_list','=',orden.codigo)])
-                get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
-                get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
-                list_serv = []
-                [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
-
-                if not get_odt and not get_req and not orden.codigo in list_serv:
-                    orden.unlink()
+            # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
+            get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]) else 0),('materials_list','=',orden.codigo)])
+            get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
+            get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo)]).maquinados_id
+            list_serv = []
+            [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
+            # Si el item no se encontro se borra de compras
+            if not get_odt and not get_req and not orden.codigo in list_serv:
+                orden.unlink()
         return res
 
 
