@@ -121,6 +121,13 @@ class Compras(models.Model):
             # Si el item no se encontro se borra de compras
             if not get_odt and not get_req and not orden.codigo in list_serv:
                 orden.unlink()
+            # Borra si el item a comprar es cero
+            if get_odt:
+                get_odt.materials_required == 0 and orden.unlink()
+            if get_req:
+                get_req.cantidad == 0 and orden.unlink()
+
+
         return res
 
 
