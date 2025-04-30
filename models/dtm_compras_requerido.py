@@ -122,10 +122,10 @@ class Compras(models.Model):
             if not get_odt and not get_req and not orden.codigo in list_serv:
                 orden.unlink()
             # Borra si el item a comprar es cero
-            if get_odt:
-                get_odt.materials_required == 0 and orden.unlink()
-            if get_req:
-                get_req.cantidad == 0 and orden.unlink()
+            if get_odt and get_odt.materials_required == 0:
+                orden.unlink()
+            elif get_req and get_req.cantidad == 0:
+                orden.unlink()
 
 
         return res
@@ -156,6 +156,17 @@ class Realizado(models.Model):
         get_this = self.env['dtm.compras.realizado'].search([])
         for row in get_this:
             row.cantidad > 0 and row.write({'unitario':row.costo/row.cantidad})
+
+        # Carga el último precio cotizado al modelo dtm.compras.precios
+        get_realizado = list(set(self.env['dtm.compras.realizado'].search([]).mapped('codigo')))
+        for codigo in get_realizado:
+            record = self.env['dtm.compras.realizado'].search([('codigo', '=', codigo)], limit=1, order='id desc')
+            if codigo in self.env['dtm.compras.precios'].search([]).mapped('codigo'):
+                self.env['dtm.compras.precios'].search([('codigo', '=', record.codigo)]).write(
+                    {'nombre': record.nombre, 'precio': record.unitario})
+            else:
+                self.env['dtm.compras.precios'].create(
+                    {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario})
 
         # get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
         # ordenes_list = set(list(filter(lambda x: len(x) < 4, get_self)))
