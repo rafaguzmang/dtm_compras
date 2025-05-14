@@ -16,6 +16,7 @@
                     <button name="action_enlace" type="object" string=""  icon="fa-link"/>
                     <field name="orden_trabajo"/>
                     <button name="action_devolver" type="object" string="" class="btn btn-primary" icon="fa-hand-o-left"/>
+                    <field name="revision_ot"/>
                     <field name="create_date"/>
                     <field name="disenador"/>
                     <field name="proveedor_id" options="{'no_open':True}"/>
