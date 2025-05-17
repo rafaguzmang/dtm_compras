@@ -168,15 +168,6 @@ class Realizado(models.Model):
                 self.env['dtm.compras.precios'].create(
                     {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario})
 
-        # get_self = self.env['dtm.compras.realizado'].search([]).mapped('orden_trabajo')
-        # ordenes_list = set(list(filter(lambda x: len(x) < 4, get_self)))
-        # get_facturado = self.env['dtm.facturado.odt'].search([]).mapped('ot_number')
-        # [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo", "=", odt)]).unlink()
-        #  for odt in ordenes_list]
-        # get_facturado = self.env['dtm.facturado.npi'].search([]).mapped('ot_number')
-        # [int(odt) in get_facturado and self.env['dtm.compras.realizado'].search([("orden_trabajo", "=", odt)]).unlink()
-        #  for odt in ordenes_list]
-
         return res
 
 
