@@ -98,6 +98,8 @@ class Compras(models.Model):
                 'fecha_compra': datetime.datetime.today(),
                 'fecha_recepcion': self.fecha_recepcion,
                 'orden_compra': self.orden_compra,
+                "revision_ot": self.revision_ot
+
             })
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
 
