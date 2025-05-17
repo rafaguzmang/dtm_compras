@@ -9,6 +9,7 @@ class Servicios(models.Model):
     nombre = fields.Char(string="Nombre del Servicio")
     cantidad = fields.Integer(string="Cantidad")
     tipo_orden = fields.Char(string="OT/NPI")
+    revision_ot = fields.Integer(string="VERSIÓN",default=1,readonly=True) # Esto es versión
     numero_orden = fields.Integer(string="Orden")
     proveedor = fields.Char(string="Proveedor")
     fecha_solicitud = fields.Date(string="Fecha de Solicitud", default= datetime.today(),readonly=True)
