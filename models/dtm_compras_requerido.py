@@ -72,20 +72,9 @@ class Compras(models.Model):
             }
             get_control = self.env['dtm.control.entradas'].search(
                 [("descripcion", "=", self.nombre), ("proveedor", "=", self.proveedor_id.nombre),
-                 ("codigo", "=", self.codigo)])
-            # print(vals)
-            # print(get_control)
-            if not get_control:
-                get_control.create(vals)
-            else:
-                cantidad = 0
-                for get in get_control:
-                    cantidad += get.cantidad
-                vals = {
-                    "cantidad": cantidad + self.cantidad
-                }
-                get_control.write(vals)
+                 ("codigo", "=", self.codigo),('orden_trabajo','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)])
 
+            get_control.write(vals) if get_control else get_control.create(vals)
 
             self.env['dtm.compras.realizado'].create({
                 'orden_trabajo': self.orden_trabajo,
