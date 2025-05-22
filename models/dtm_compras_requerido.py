@@ -130,8 +130,6 @@ class Compras(models.Model):
                 orden.unlink()
             elif get_req and get_req.cantidad == 0:
                 orden.unlink()
-
-
         return res
 
 
