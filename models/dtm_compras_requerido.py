@@ -106,17 +106,21 @@ class Compras(models.Model):
          # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
             # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
+            print(orden.orden_trabajo,orden.revision_ot,orden.tipo_orden,orden.codigo)
             get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]) else 0),('materials_list','=',orden.codigo)],limit=1)
             get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
             get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
             list_serv = []
             [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
+
             # Si el item no se encontro se borra de compras
             if not get_odt and not get_req and not orden.codigo in list_serv:
                 orden.unlink()
+
             # Borra si el item a comprar es cero
             if get_odt and get_odt.materials_required == 0:
                 orden.unlink()
+
             elif get_req and get_req.cantidad == 0:
                 orden.unlink()
 
