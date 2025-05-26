@@ -71,8 +71,7 @@ class Compras(models.Model):
                 # "aprovacion": self.aprovacion and "Aprobado",
             }
             get_control = self.env['dtm.control.entradas'].search(
-                [("descripcion", "=", self.nombre), ("proveedor", "=", self.proveedor_id.nombre),
-                 ("codigo", "=", self.codigo),('orden_trabajo','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)])
+                [("codigo", "=", self.codigo),('orden_trabajo','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)])
 
             get_control.write(vals) if get_control else get_control.create(vals)
 
@@ -163,6 +162,19 @@ class Realizado(models.Model):
             else:
                 self.env['dtm.compras.precios'].create(
                     {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario})
+
+        get_comprado = self.env['dtm.compras.realizado'].search([('comprado', '!=', 'Recibido')])
+        for item in get_comprado:
+            if not self.env['dtm.control.entradas'].search([('codigo','=',str(item.codigo)),('orden_trabajo','=',item.orden_trabajo)]):
+                self.env['dtm.control.entradas'].create({
+                        "proveedor": item.proveedor,
+                        "codigo": item.codigo,
+                        "descripcion": item.nombre,
+                        "cantidad": item.cantidad,
+                        "fecha_recepcion": item.fecha_recepcion,
+                        "orden_trabajo": item.orden_trabajo,
+                        "revision_ot": item.revision_ot
+                })
 
         return res
 
