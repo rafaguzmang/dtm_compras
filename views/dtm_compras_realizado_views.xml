@@ -21,6 +21,9 @@
                     <filter string="Recibido" name="comprado" domain="[('comprado','!=',False)]"/>
                     <filter string="No Recibido" name="no-comprado" domain="[('comprado','=',False)]"/>
 
+
+
+
                </search>
             </field>
         </record>

@@ -25,6 +25,7 @@ class Compras(models.Model):
     permiso = fields.Boolean(compute="_compute_permiso")
     servicio = fields.Boolean(string="Servicio", readonly=True)
     listo = fields.Boolean()
+    nesteo = fields.Boolean()
 
     def action_devolver(self):
         self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)]).id),('materials_list','=',self.codigo)]).write({'revision':False})
@@ -105,7 +106,7 @@ class Compras(models.Model):
          # Quita los campos borrados de sus respectivas ordenes
         for orden in get_info:
             # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
-            print(orden.orden_trabajo,orden.revision_ot,orden.tipo_orden,orden.codigo)
+            # print(orden.orden_trabajo,orden.revision_ot,orden.tipo_orden,orden.codigo)
             get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]) else 0),('materials_list','=',orden.codigo)],limit=1)
             get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
             get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
