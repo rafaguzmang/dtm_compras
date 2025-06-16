@@ -52,8 +52,8 @@
                     <field name="proveedor_id"/>
                     <separator/>
 
-                     <filter string="Nesteo" name="con-nesteo" domain="[('nesteo','=',False)]"/>
-                    <filter string="Sin Nesteo" name="no-nesteo" domain="[('nesteo','!=',False)]"/>
+                     <filter string="Nesteo" name="con-nesteo" domain="[('nesteo','!=',False)]"/>
+                    <filter string="Sin Nesteo" name="no-nesteo" domain="[('nesteo','=',False)]"/>
                </search>
             </field>
         </record>
