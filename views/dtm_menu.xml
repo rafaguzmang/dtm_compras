@@ -5,5 +5,7 @@
             <menuitem id="dtm_compras_realizado_menu" action="dtm_compras.dtm_compras_realizado_accion" />
             <menuitem id="dtm_compras_servicios_action_menu" action="dtm_compras.dtm_compras_servicios_action"/>
             <menuitem id="dtm_compras_precios_menu" action="dtm_compras_precios_accion" />
+            <menuitem id="dtm_compras_seguimiento_compras_menu" action="dtm_compras_seguimiento_compras_action"/>
+
      </menuitem>
 </odoo>

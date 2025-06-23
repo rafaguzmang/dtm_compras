@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="dtm_compras_seguimiento_compras_action" model="ir.actions.client">
+        <field  name="name">Seguimiento</field>
+        <field name="tag">dtm_compras.seguimiento_compras</field>
+    </record>
+
+<!-- Menú principal -->
+<!--    <menuitem id="dtm_compras_seguimiento_compras_menu" action="dtm_compras_seguimiento_compras_action"/>-->
+
+</odoo>
