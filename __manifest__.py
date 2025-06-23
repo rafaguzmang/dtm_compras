@@ -14,18 +14,17 @@
         'views/dtm_compras_realizado_views.xml',
         'views/dtm_compras_servicios_views.xml',
         'views/dtm_compras_precios_view.xml',
+        'views/seguimiento_compras_view.xml',
         # Angular assets
         # 'views/angular_assets.xml',
         # Menú
         'views/dtm_menu.xml',
     ],
-    # 'assets': {
-    #     'web.assets_frontend': [
-    #         'dtm_compras/static/src/angular/ordenes-seguimiento/browser/polyfills.js',
-    #         'dtm_compras/static/src/angular/ordenes-seguimiento/browser/main.js',
-    #         'dtm_compras/static/src/angular/ordenes-seguimiento/browser/scripts.js',
-    #         'dtm_compras/static/src/angular/ordenes-seguimiento/browser/styles.css',
-    #     ],
-    # },
+    'assets': {
+        'web.assets_backend': [
+            'dtm_compras/static/src/js/seguimiento_compras.js',
+            'dtm_compras/static/src/xml/seguimiento_compras.xml'
+        ],
+    },
     'license': 'LGPL-3',
 }

@@ -1,0 +1,51 @@
+<templates xml:space="preserve">
+    <t t-name="dtm_compras.seguimiento_compras" owl="1">
+      <div class="container">
+
+        <t t-foreach="Object.keys(state.datos)" t-as="cliente" t-key="cliente">
+          <div class="my-3 p-3 border border-3 rounded">
+            <h3><t t-esc="cliente" /></h3>
+
+            <t t-set="ordenes_cliente" t-value="state.datos[cliente]" />
+            <t t-foreach="Object.keys(ordenes_cliente)" t-as="orden" t-key="orden">
+              <t t-set="materiales" t-value="ordenes_cliente[orden]" />
+              <div class="ms-3 mb-4">
+                <div class="d-flex justify-content-between">
+                  <h5>Orden: <t t-esc="orden" /></h5>
+                  <h5 class="text-warning">
+                    <t t-if="cliente !== 'Requisición de Material' and !materiales.every(m => m.nesteo)">
+                      Falta Nesteo
+                    </t>
+                  </h5>
+                </div>
+
+                <table class="table table-sm table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Código</th>
+                      <th>Proveedor</th>
+                      <th>Nombre</th>
+                      <th>Cantidad</th>
+                      <th>Costo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <t t-foreach="materiales" t-as="material" t-key="material.codigo">
+                      <tr>
+                        <td><t t-esc="material.codigo" /></td>
+                        <td><t t-esc="material.proveedor_id or 'N/A'" /></td>
+                        <td><t t-esc="material.nombre" /></td>
+                        <td><t t-esc="material.cantidad" /></td>
+                        <td><t t-esc="material.costo" /></td>
+                      </tr>
+                    </t>
+                  </tbody>
+                </table>
+              </div>
+            </t>
+          </div>
+        </t>
+      </div>
+
+    </t>
+</templates>
