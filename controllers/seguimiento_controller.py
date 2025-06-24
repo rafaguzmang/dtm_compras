@@ -10,6 +10,10 @@ class ComprasWebSiteDirections(http.Controller):
         ordenes = request.env['dtm.compras.requerido'].sudo().search([])
 
         for orden in ordenes:
+            datos_orden = request.env['dtm.odt'].sudo().search([
+                    ('ot_number', '=', orden.orden_trabajo),
+                    ('revision_ot', '=', orden.revision_ot)
+                ])
             list_ordenes.append({
                 'orden_trabajo': orden.orden_trabajo,
                 'tipo_orden': orden.tipo_orden,
@@ -29,10 +33,10 @@ class ComprasWebSiteDirections(http.Controller):
                 'servicio': orden.servicio,
                 'listo': orden.listo,
                 'nesteo': orden.nesteo,
-                'cliente': request.env['dtm.odt'].sudo().search([
-                    ('ot_number', '=', orden.orden_trabajo),
-                    ('revision_ot', '=', orden.revision_ot)
-                ]).name_client if orden.tipo_orden in ['OT', 'NPI'] else 'Requisición de Material'
+                'cliente': datos_orden.name_client if orden.tipo_orden in ['OT', 'NPI'] else 'Requisición de Material',
+                'date_rel':datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
+                'product_name':datos_orden.product_name if datos_orden else None
+
             })
 
         # Agrupar por cliente y orden_trabajo
