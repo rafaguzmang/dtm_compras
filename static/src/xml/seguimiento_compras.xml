@@ -9,9 +9,23 @@
             <t t-set="ordenes_cliente" t-value="state.datos[cliente]" />
             <t t-foreach="Object.keys(ordenes_cliente)" t-as="orden" t-key="orden">
               <t t-set="materiales" t-value="ordenes_cliente[orden]" />
+
+              <t t-if="cliente !== 'Requisición de Material'">
+                <t t-set="primer_material" t-value="materiales[0]" />
+              </t>
+
+
+
               <div class="ms-3 mb-4">
                 <div class="d-flex justify-content-between">
                   <h5>Orden: <t t-esc="orden" /></h5>
+
+                   <t t-if="cliente !== 'Requisición de Material'">
+                    <h5 class="text-primary"><t t-esc="primer_material.product_name || 'N/A'" /></h5>
+                    <h5 >Entrega: <t t-esc="primer_material.date_rel || 'Sin fecha'" /></h5>
+                  </t>
+
+
                   <h5 class="text-warning">
                     <t t-if="cliente !== 'Requisición de Material' and !materiales.every(m => m.nesteo)">
                       Falta Nesteo
