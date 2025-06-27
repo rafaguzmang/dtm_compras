@@ -1,65 +1,79 @@
 <templates xml:space="preserve">
-    <t t-name="dtm_compras.seguimiento_compras" owl="1">
-      <div class="container">
+  <t t-name="dtm_compras.seguimiento_compras" owl="1">
+    <div class="container">
 
-        <t t-foreach="Object.keys(state.datos)" t-as="cliente" t-key="cliente">
-          <div class="my-3 p-3 border border-3 rounded">
-            <h3><t t-esc="cliente" /></h3>
+      <t t-foreach="Object.keys(state.datos)" t-as="cliente" t-key="cliente">
+        <div class="my-3 p-3 border border-3 rounded">
+          <h3><t t-esc="cliente" /></h3>
 
-            <t t-set="ordenes_cliente" t-value="state.datos[cliente]" />
-            <t t-foreach="Object.keys(ordenes_cliente)" t-as="orden" t-key="orden">
-              <t t-set="materiales" t-value="ordenes_cliente[orden]" />
+          <t t-set="ordenes_cliente" t-value="state.datos[cliente]" />
+          <t t-foreach="Object.keys(ordenes_cliente)" t-as="orden" t-key="orden">
+            <t t-set="materiales" t-value="ordenes_cliente[orden]" />
+
+            <div class="ms-3 mb-4">
 
               <t t-if="cliente !== 'Requisición de Material'">
                 <t t-set="primer_material" t-value="materiales[0]" />
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5>Orden: <t t-esc="orden" /></h5>
+                    <h5 class="text-primary">
+                      <t t-esc="primer_material.product_name || 'N/A'" />
+                    </h5>
+                    <h5>Entrega: <t t-esc="primer_material.date_rel || 'Sin fecha'" /></h5>
+                  </div>
+
+                  <div class="d-flex align-items-center">
+                    <h5 class="text-warning me-3">
+                      <t t-if="!materiales.every(m => m.nesteo)">
+                        P.O.
+                      </t>
+                    </h5>
+
+                    <t t-if="primer_material.po_pdf_url">
+                      <a t-att-href="primer_material.po_pdf_url"
+                         target="_blank"
+                         class="btn btn-sm btn-outline-primary">
+                        Ver PDF
+                      </a>
+                    </t>
+                  </div>
+                </div>
               </t>
 
-
-
-              <div class="ms-3 mb-4">
-                <div class="d-flex justify-content-between">
+              <t t-if="cliente === 'Requisición de Material'">
+                <div class="d-flex justify-content-between align-items-center">
                   <h5>Orden: <t t-esc="orden" /></h5>
-
-                   <t t-if="cliente !== 'Requisición de Material'">
-                    <h5 class="text-primary"><t t-esc="primer_material.product_name || 'N/A'" /></h5>
-                    <h5 >Entrega: <t t-esc="primer_material.date_rel || 'Sin fecha'" /></h5>
-                  </t>
-
-
-                  <h5 class="text-warning">
-                    <t t-if="cliente !== 'Requisición de Material' and !materiales.every(m => m.nesteo)">
-                      Falta Nesteo
-                    </t>
-                  </h5>
                 </div>
+              </t>
 
-                <table class="table table-sm table-bordered">
-                  <thead>
+              <table class="table table-sm table-bordered mt-2">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Proveedor</th>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Costo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="materiales" t-as="material" t-key="material.codigo">
                     <tr>
-                      <th>Código</th>
-                      <th>Proveedor</th>
-                      <th>Nombre</th>
-                      <th>Cantidad</th>
-                      <th>Costo</th>
+                      <td><t t-esc="material.codigo" /></td>
+                      <td><t t-esc="material.proveedor_id or 'N/A'" /></td>
+                      <td><t t-esc="material.nombre" /></td>
+                      <td><t t-esc="material.cantidad" /></td>
+                      <td><t t-esc="material.costo" /></td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    <t t-foreach="materiales" t-as="material" t-key="material.codigo">
-                      <tr>
-                        <td><t t-esc="material.codigo" /></td>
-                        <td><t t-esc="material.proveedor_id or 'N/A'" /></td>
-                        <td><t t-esc="material.nombre" /></td>
-                        <td><t t-esc="material.cantidad" /></td>
-                        <td><t t-esc="material.costo" /></td>
-                      </tr>
-                    </t>
-                  </tbody>
-                </table>
-              </div>
-            </t>
-          </div>
-        </t>
-      </div>
-
-    </t>
+                  </t>
+                </tbody>
+              </table>
+            </div>
+          </t>
+        </div>
+      </t>
+    </div>
+  </t>
 </templates>
