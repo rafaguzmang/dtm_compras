@@ -17,7 +17,13 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h5>Orden: <t t-esc="orden" /></h5>
+                    <h5 style="color: black;"
+                        onmouseover="this.style.color='#875A7B'; this.style.cursor='pointer';"
+                        onmouseout="this.style.color='black';"
+                        t-on-click="() => mostrarDialogo(orden)">
+                      Orden: <t t-esc="orden" />
+                    </h5>
+                    <h5>Diseñador: <t t-esc="primer_material.disenador" /></h5>
                     <h5 class="text-primary">
                       <t t-esc="primer_material.product_name || 'N/A'" />
                     </h5>
@@ -27,7 +33,7 @@
                   <div class="d-flex align-items-center">
                     <h5 class="text-warning me-3">
                       <t t-if="!materiales.every(m => m.nesteo)">
-                        P.O.
+                        Falta Nesteo
                       </t>
                     </h5>
 
@@ -42,20 +48,16 @@
                 </div>
               </t>
 
-              <t t-if="cliente === 'Requisición de Material'">
-                <div class="d-flex justify-content-between align-items-center">
-                  <h5>Orden: <t t-esc="orden" /></h5>
-                </div>
-              </t>
-
               <table class="table table-sm table-bordered mt-2">
                 <thead>
                   <tr>
-                    <th>Código</th>
-                    <th>Proveedor</th>
-                    <th>Nombre</th>
-                    <th>Cantidad</th>
-                    <th>Costo</th>
+                    <th style="width:8%">Código</th>
+                    <th style="width:10%">Proveedor</th>
+                    <th style="width:40%">Nombre</th>
+                    <th style="width:8%">Cantidad</th>
+                    <th style="width:8%">Costo</th>
+                    <th style="width:11%">En Compras</th>
+                    <th style="width:15%">Notas</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -65,7 +67,9 @@
                       <td><t t-esc="material.proveedor_id or 'N/A'" /></td>
                       <td><t t-esc="material.nombre" /></td>
                       <td><t t-esc="material.cantidad" /></td>
-                      <td><t t-esc="material.costo" /></td>
+                      <td><t t-esc="material.costo.toFixed(2)" /></td>
+                      <t t-esc="(new Date(material.en_compras)).toISOString().split('T')[0]" />
+                      <td><t t-esc="material.observacion" /></td>
                     </tr>
                   </t>
                 </tbody>
@@ -75,5 +79,11 @@
         </div>
       </t>
     </div>
+    <t t-if="state.showDialogMateriales">
+            <DialogMateriales
+              orden="state.dialogOrden"
+              materiales ="state.dialogMateriales"
+              close="() => { state.showDialogMateriales = false }" />
+    </t>
   </t>
 </templates>

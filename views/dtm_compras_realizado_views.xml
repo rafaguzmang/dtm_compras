@@ -37,11 +37,14 @@
                         decoration-danger="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
                     <field name="orden_trabajo"/>
                     <field name="revision_ot"/>
+                    <field name="solicitado"/>
                     <field name="proveedor" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
                     <field name="cantidad_almacen"/>
+                    <field name="mostrador"/>
+                    <field name="mayoreo"/>
                     <field name="unitario"/>
                     <field name="costo"/>
                     <field name="aprovacion"/>

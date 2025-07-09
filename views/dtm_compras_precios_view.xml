@@ -24,9 +24,10 @@
             <field name="model">dtm.compras.precios</field>
             <field name="arch" type="xml">
                 <tree>
-                  <field name="codigo"/>
-                  <field name="nombre"/>
-                  <field name="precio"/>
+                    <field name="codigo"/>
+                    <field name="nombre"/>
+                    <field name="precio"/>
+                    <field name="mayoreo"/>
                 </tree>
             </field>
         </record>

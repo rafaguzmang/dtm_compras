@@ -1,0 +1,50 @@
+<template xml:space ="preserve">
+    <odoo>
+        <t t-name="dtm_compras.dilog_materiales_template" owl = "1">
+            <div class="modal-backdrop show"></div>
+            <div class="modal d-block" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-content">
+                             <div class="modal-header">
+                                <h5 class="modal-title">Orden: <t t-esc="props.orden"/></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" t-on-click="props.close"></button>
+                              </div>
+                            <div class="modal-body">
+                                <div class="modal-body">
+                                <table class="table table-bordered">
+                                    <thead>
+                                      <tr>
+                                        <th>ID</th>
+                                        <th>Descripción</th>
+                                        <th>Medidas</th>
+                                        <th>Cantidad</th>
+                                        <th>Restante</th>
+                                        <th>Status</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <t t-foreach="props.materiales" t-as="material" t-key="material_index">
+                                        <tr>
+                                          <td><t t-esc="material[0]"/></td>
+                                          <td><t t-esc="material[1]"/></td>
+                                          <td><t t-esc="material[2]"/></td>
+                                          <td><t t-esc="material[3]"/></td>
+                                          <td><t t-esc="material[4]"/></td>
+                                          <td><t t-esc="material[5]"/></td>
+                                        </tr>
+                                      </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </odoo>
+
+
+</template>

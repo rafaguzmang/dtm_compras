@@ -26,6 +26,8 @@ class Compras(models.Model):
     servicio = fields.Boolean(string="Servicio", readonly=True)
     listo = fields.Boolean()
     nesteo = fields.Boolean()
+    mostrador = fields.Float(string='Mostrador', required=True)
+    mayoreo = fields.Float(string='Mayoreo', required=True)
 
     def action_devolver(self):
         self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)]).id),('materials_list','=',self.codigo)]).write({'revision':False})
@@ -62,9 +64,9 @@ class Compras(models.Model):
 
         if self.tipo_orden == 'Cotización':
             ventas = self.env['dtm.cotizacion.materiales'].search([('material_id','=',self.codigo)],limit=1)
-            # print(ventas)
+            print(ventas)
             if ventas:
-                ventas.precio = self.unitario
+                ventas.write({'precio': self.unitario,'mayoreo':self.mayoreo })
                 self.unlink()
         elif self.proveedor_id.nombre and self.unitario and self.orden_compra and self.fecha_recepcion:
             vals = {
@@ -74,7 +76,7 @@ class Compras(models.Model):
                 "cantidad": self.cantidad,
                 "fecha_recepcion": self.fecha_recepcion,
                 "orden_trabajo": self.orden_trabajo,
-                "revision_ot": self.revision_ot
+                "revision_ot": self.revision_ot,
                 # "unitario": self.unitario,
                 # "aprovacion": self.aprovacion and "Aprobado",
             }
@@ -85,16 +87,19 @@ class Compras(models.Model):
 
             self.env['dtm.compras.realizado'].create({
                 'orden_trabajo': self.orden_trabajo,
+                "revision_ot": self.revision_ot,
+                "solicitado": self.create_date,
                 'proveedor': self.proveedor_id.nombre,
                 'codigo': self.codigo,
                 'nombre': self.nombre,
                 'cantidad': self.cantidad,
-                'costo': self.costo,
+                "mostrador": self.mostrador,
+                "mayoreo": self.mayoreo,
                 'unitario':self.unitario,
+                'costo': self.costo,
+                'orden_compra': self.orden_compra,
                 'fecha_compra': datetime.datetime.today(),
                 'fecha_recepcion': self.fecha_recepcion,
-                'orden_compra': self.orden_compra,
-                "revision_ot": self.revision_ot
 
             })
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
@@ -141,6 +146,7 @@ class Realizado(models.Model):
 
     orden_trabajo = fields.Char(string="Orden de Trabajo")
     revision_ot = fields.Integer(string="VER",default=1,readonly=True) # Esto es versión
+    solicitado = fields.Datetime(string='Solicitado')
     proveedor = fields.Char(string="Proveedor")
     codigo = fields.Integer(string="Código")
     nombre = fields.Char(string="Nombre")
@@ -153,6 +159,8 @@ class Realizado(models.Model):
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
     comprado = fields.Char(string="Recibido")
     aprovacion = fields.Char(string="Aprovado", readonly=True)
+    mostrador = fields.Float(string='Mostrador', readonly=True)
+    mayoreo = fields.Float(string='Mayoreo', readonly=True)
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado, self).get_view(view_id, view_type, **options)
@@ -167,10 +175,10 @@ class Realizado(models.Model):
             record = self.env['dtm.compras.realizado'].search([('codigo', '=', codigo)], limit=1, order='id desc')
             if codigo in self.env['dtm.compras.precios'].search([]).mapped('codigo'):
                 self.env['dtm.compras.precios'].search([('codigo', '=', record.codigo)]).write(
-                    {'nombre': record.nombre, 'precio': record.unitario})
+                    {'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
             else:
                 self.env['dtm.compras.precios'].create(
-                    {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario})
+                    {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
 
         get_comprado = self.env['dtm.compras.realizado'].search([('comprado', '!=', 'Recibido')])
         for item in get_comprado:
