@@ -14,7 +14,11 @@ export class Seguimiento extends Component {
             dialogOrden:null,
             todosMateriales:[],
             dialogMateriales:[],
+            transitoList:{},
+            activeDiv: 'div1'
         });
+        this.showDiv = this.showDiv.bind(this);
+
 
         onMounted(async () => {
             try{
@@ -34,7 +38,19 @@ export class Seguimiento extends Component {
                 });
                 const material = await materiales_response.json();
                 this.todosMateriales = material.result;
-//                console.log(this.todosMateriales)
+
+                const transito_data = await fetch('/dtm_comprado/get_data',{
+                    method:'POST',
+                    headers:{
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body:JSON.stringify({})
+                });
+                const transito = await transito_data.json();
+                console.log(transito.result);
+                this.state.transitoList = transito.result;
+                console.log(this.state.transitoList);
 
 
             }catch (error){
@@ -43,7 +59,11 @@ export class Seguimiento extends Component {
         });
     }
 
-     mostrarDialogo = (orden =>
+    showDiv(div) {
+        this.state.activeDiv = div;
+    }
+
+    mostrarDialogo = (orden =>
          {
             const materialData = this.todosMateriales.find(item => item.orden === orden);
 //            console.log('Orden',orden);
@@ -52,7 +72,7 @@ export class Seguimiento extends Component {
                 this.state.showDialogMateriales = true;
                 this.state.dialogOrden = orden;
                 this.state.dialogMateriales = materialData.materiales;
-                console.log(materialData.materiales);
+//                console.log(materialData.materiales);
             }else {
                 console.error("No se encontraron materiales para la orden:", orden);
             }
