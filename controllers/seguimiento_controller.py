@@ -108,15 +108,15 @@ class CompradoWebSite(http.Controller):
             ])
 
             list_ordenes.append({
-                'orden_trabajo': orden.orden_trabajo,
-                'revision_ot': orden.revision_ot,
-                'proveedor_id': orden.proveedor,
-                'codigo': orden.codigo,
-                'nombre': orden.nombre,
-                'cantidad': orden.cantidad,
-                'unitario': orden.unitario,
-                'costo': orden.costo,
-                'orden_compra': orden.orden_compra,
+                'orden_trabajo': orden.orden_trabajo if orden.orden_trabajo else '',
+                'revision_ot': orden.revision_ot if orden.revision_ot else '',
+                'proveedor_id': orden.proveedor if orden.proveedor else '',
+                'codigo': orden.codigo if orden.codigo else '',
+                'nombre': orden.nombre if orden.nombre else '',
+                'cantidad': orden.cantidad if orden.cantidad else '',
+                'unitario': orden.unitario if orden.unitario else '',
+                'costo': orden.costo if orden.costo else '',
+                'orden_compra': orden.orden_compra if orden.orden_compra else '',
                 'fecha_recepcion': orden.fecha_recepcion.isoformat() if orden.fecha_recepcion else None,
                 'en_compras': orden.solicitado.isoformat() if orden.solicitado else None,
                 'cliente': datos_orden.name_client if datos_orden.name_client else 'Requisición de Material',
@@ -162,7 +162,7 @@ class CompradoWebSite(http.Controller):
             for orden, items in ordenes.items():
                 ordenes[orden] = sorted(items, key=lambda i: (obtener_prioridad(i), limpiar_texto(i['nombre'])))
 
-        print(resultado);
+        # print(resultado);
         # === Fin de la parte de ordenado ===
         return resultado;
         # resultado = {'hola':'mundo'}

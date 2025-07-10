@@ -96,7 +96,7 @@
           <div class="my-3 p-3 border border-3 rounded">
             <h3><t t-esc="cliente" /></h3>
 
-            <t t-set="ordenes_cliente" t-value="state.datos[cliente]" />
+            <t t-set="ordenes_cliente" t-value="state.transitoList[cliente]" />
             <t t-foreach="Object.keys(ordenes_cliente)" t-as="orden" t-key="orden">
               <t t-set="materiales" t-value="ordenes_cliente[orden]" />
 
