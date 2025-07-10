@@ -34,6 +34,7 @@ class ComprasWebSiteDirections(http.Controller):
                 'aprovacion': orden.aprovacion,
                 'permiso': orden.permiso,
                 'servicio': orden.servicio,
+                'en_compras':orden.create_date.isoformat() if orden.create_date else None,
                 'listo': orden.listo,
                 'nesteo': orden.nesteo,
                 'cliente': datos_orden.name_client if orden.tipo_orden in ['OT', 'NPI'] else 'Requisición de Material',

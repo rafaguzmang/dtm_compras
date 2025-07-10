@@ -8,7 +8,9 @@ class Precios(models.Model):
 
     codigo = fields.Integer(string='Código', readonly=True)
     nombre = fields.Char(string='Nombre', readonly=True)
-    precio = fields.Float(string='Precio', readonly=True)
+    precio = fields.Float(string='Mostrador', readonly=True)
+    mayoreo = fields.Float(string='Mayoreo', readonly=True)
+
 
 
     def get_view(self, view_id=None, view_type='form', **options):
