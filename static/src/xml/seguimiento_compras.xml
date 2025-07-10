@@ -27,7 +27,7 @@
                   <div class="d-flex align-items-center">
                     <h5 class="text-warning me-3">
                       <t t-if="!materiales.every(m => m.nesteo)">
-                        P.O.
+                        Falta Nesteo
                       </t>
                     </h5>
 
@@ -35,7 +35,7 @@
                       <a t-att-href="primer_material.po_pdf_url"
                          target="_blank"
                          class="btn btn-sm btn-outline-primary">
-                        Ver PDF
+                        P.O.
                       </a>
                     </t>
                   </div>
