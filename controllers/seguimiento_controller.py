@@ -204,3 +204,52 @@ class CompradoWebSite(http.Controller):
         # return request.make_response(
         # json.dumps(resultado, default=str),
         # headers=[('Content-Type', 'application/json')])
+
+
+class Materiales(http.Controller):
+    @http.route('/dtm_materiales/get_data', type='json', auth='public')
+    def lista_materiales(self, **kwargs):
+        ordenes = request.env['dtm.odt'].sudo().search([])
+
+        result = []
+
+        for orden in ordenes:
+            # Trae el ide de dtm_odt
+            ot_id = orden.id
+            lista_materiales = [
+                [
+                    material.materials_list.id,
+                    material.nombre,
+                    material.medida,
+                    material.materials_cuantity,
+                    material.materials_required,
+                    'Entregado' if material.entregado else
+                    'Comprado' if request.env['dtm.compras.realizado'].search(
+                        [('orden_trabajo', '=', orden.ot_number), ('revision_ot', '=', orden.revision_ot),
+                         ('codigo', '=', material.materials_list.id)], limit=1).comprado else
+                    'En cámino' if request.env['dtm.compras.realizado'].search(
+                        [('orden_trabajo', '=', orden.ot_number), ('revision_ot', '=', orden.revision_ot),
+                         ('codigo', '=', material.materials_list.id)], limit=1) else
+                    'En compra' if request.env['dtm.compras.requerido'].search(
+                        [('orden_trabajo', '=', orden.ot_number), ('revision_ot', '=', orden.revision_ot),
+                         ('codigo', '=', material.materials_list.id)], limit=1) else
+                    'En Almacén' if material.materials_required == 0 and material.materials_cuantity > 0 else
+                    'En Revisión' if not material.almacen else None
+                ]
+                for material in orden.materials_ids]
+            lista_ordenada = sorted(lista_materiales, key=lambda item: item[5] in item)
+            result.append({
+                'orden': orden.ot_number,
+                'version': orden.revision_ot,
+                'ot_id': orden.id,
+                'materiales': lista_ordenada
+            })
+
+        return result
+        # return request.make_response(
+        #     json.dumps(result),
+        #     headers={
+        #         'Content-Type': 'application/json',
+        #         'Access-Control-Allow-Origin': '*',
+        #     }
+        # )

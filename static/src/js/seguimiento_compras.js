@@ -35,7 +35,7 @@ export class Seguimiento extends Component {
 //                console.log(data.result);
                 this.state.datos = data.result;
 
-                const materiales_response = await fetch('/seguimiento_materiales',{
+                const materiales_response = await fetch('/dtm_materiales/get_data',{
                     method:'POST',
                     headers:{
                         'Content-Type': 'application/json',
@@ -44,8 +44,9 @@ export class Seguimiento extends Component {
                     body:JSON.stringify({})
                 });
                 const material = await materiales_response.json();
-                console.log('material',material);
                 this.todosMateriales = material.result;
+                console.log('material1',material.result);
+                console.log('material',this.todosMateriales);
 
                 const transito_data = await fetch('/dtm_comprado/get_data',{
                     method:'POST',
@@ -73,14 +74,13 @@ export class Seguimiento extends Component {
 
     mostrarDialogo = (orden =>
          {
-            const materialData = this.todosMateriales.find(item => item.orden === orden);
-//            console.log('Orden',orden);
-//            console.log('materialData',materialData.materiales);
+             console.log('Orden',this.todosMateriales);
+            const materialData = this.todosMateriales.find(item => item.orden == orden);
+            console.log('materialData',materialData,orden);
             if (materialData.materiales){
                 this.state.showDialogMateriales = true;
                 this.state.dialogOrden = orden;
                 this.state.dialogMateriales = materialData.materiales;
-//                console.log(materialData.materiales);
             }else {
                 console.error("No se encontraron materiales para la orden:", orden);
             }
