@@ -22,11 +22,18 @@ export class Seguimiento extends Component {
 
         onMounted(async () => {
             try{
-                const response = await fetch('/dtm_compras/get_data');
+                const response = await fetch('/dtm_compras/get_data',{
+                    method:'POST',
+                    headers:{
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body:JSON.stringify({})
+                });
 
                 const data = await response.json();
-//                console.log(data);
-                this.state.datos = data;
+//                console.log(data.result);
+                this.state.datos = data.result;
 
                 const materiales_response = await fetch('/seguimiento_materiales',{
                     method:'POST',
@@ -37,6 +44,7 @@ export class Seguimiento extends Component {
                     body:JSON.stringify({})
                 });
                 const material = await materiales_response.json();
+                console.log('material',material);
                 this.todosMateriales = material.result;
 
                 const transito_data = await fetch('/dtm_comprado/get_data',{
@@ -48,9 +56,9 @@ export class Seguimiento extends Component {
                     body:JSON.stringify({})
                 });
                 const transito = await transito_data.json();
-                console.log(transito.result);
+//                console.log(transito.result);
                 this.state.transitoList = transito.result;
-                console.log(this.state.transitoList);
+//                console.log(this.state.transitoList);
 
 
             }catch (error){
