@@ -64,7 +64,6 @@ class Compras(models.Model):
 
         if self.tipo_orden == 'Cotización':
             ventas = self.env['dtm.cotizacion.materiales'].search([('material_id','=',self.codigo)],limit=1)
-            print(ventas)
             if ventas:
                 ventas.write({'precio': self.unitario,'mayoreo':self.mayoreo })
                 self.unlink()
@@ -84,7 +83,9 @@ class Compras(models.Model):
                 [("codigo", "=", self.codigo),('orden_trabajo','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)])
 
             get_control.write(vals) if get_control else get_control.create(vals)
-
+            model_id = self.env['dtm.requisicion'].search([('folio','=',int(self.orden_trabajo))])
+            req_material = self.env['dtm.requisicion.material'].search([('model_id','=',model_id.id),('codigo','=',self.codigo)])
+            req_material.write({'comprado':True}) if req_material else None
             self.env['dtm.compras.realizado'].create({
                 'orden_trabajo': self.orden_trabajo,
                 "revision_ot": self.revision_ot,

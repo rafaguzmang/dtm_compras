@@ -72,7 +72,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <t t-foreach="materiales" t-as="material" t-key="material.codigo">
+                    <t t-foreach="materiales" t-as="material" t-key="material.codigo + '_' + loop.index">
                       <tr>
                         <td><t t-esc="material.codigo" /></td>
                         <td><t t-esc="material.proveedor_id or 'N/A'" /></td>
