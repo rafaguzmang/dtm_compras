@@ -11,9 +11,11 @@ class ComprasWebSiteDirections(http.Controller):
     @http.route('/dtm_compras/get_data', type='json', auth='public', csrf=False)
     def get_compras(self, **kw):
         list_ordenes = []
+        cont = 0
         ordenes = request.env['dtm.compras.requerido'].sudo().search([])
-
-        for orden in ordenes:
+        ordenes_unicos = list(set(ordenes.mapped('orden_trabajo')))
+        ordenes_filtradas = [request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',unico)],limit=1) for unico in ordenes_unicos ]
+        for orden in ordenes_filtradas:
             # Se obtienen los datos de la orden
             datos_orden = request.env['dtm.odt'].sudo().search([
                 ('ot_number', '=', orden.orden_trabajo),
@@ -21,31 +23,80 @@ class ComprasWebSiteDirections(http.Controller):
             ])
             # Se obtiene la P.O. del modulo de ventas
             po_pdf = request.env['dtm.compras.items'].sudo().search([('orden_trabajo','=',orden.orden_trabajo)],limit=1).model_id.archivos_id
-            list_ordenes.append({
-                'orden_trabajo': orden.orden_trabajo,
-                'tipo_orden': orden.tipo_orden,
-                'revision_ot': orden.revision_ot,
-                'proveedor_id': orden.proveedor_id.nombre if orden.proveedor_id else False,
-                'codigo': orden.codigo,
-                'nombre': orden.nombre,
-                'cantidad': orden.cantidad,
-                'unitario': orden.unitario,
-                'costo': orden.costo,
-                'orden_compra': orden.orden_compra,
-                'fecha_recepcion': orden.fecha_recepcion.isoformat() if orden.fecha_recepcion else None,
-                'disenador': orden.disenador,
-                'observacion': orden.observacion,
-                'aprovacion': orden.aprovacion,
-                'permiso': orden.permiso,
-                'servicio': orden.servicio,
-                'en_compras':orden.create_date.isoformat() if orden.create_date else None,
-                'listo': orden.listo,
-                'nesteo': orden.nesteo,
-                'cliente': datos_orden.name_client if orden.tipo_orden in ['OT', 'NPI'] else 'Requisición de Material',
-                'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
-                'product_name': datos_orden.product_name if datos_orden else None,
-                'po_pdf_url': f'/web/content/{po_pdf.id}?mimetype=application/pdf&download=false' if po_pdf else None
-            })
+            # print(datos_orden.materials_ids)
+            if datos_orden:
+                for row in datos_orden.materials_ids:
+                    en_compra = request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('codigo','=',row.materials_list.id)])
+                    list_ordenes.append({
+                        'contador':cont,
+                        'orden_trabajo': orden.orden_trabajo,
+                        'tipo_orden': orden.tipo_orden,
+                        'revision_ot': orden.revision_ot,
+                        'proveedor_id': orden.proveedor_id.nombre if en_compra and orden.proveedor_id else None,
+                        'codigo': row.materials_list.id,
+                        'nombre': f"{row.materials_list.nombre} {row.materials_list.medida}",
+                        'total': orden.cantidad if en_compra else row.materials_cuantity,
+                        'cantidad': orden.cantidad if en_compra else 0,
+                        'unitario': orden.unitario if en_compra else 0,
+                        'costo': orden.costo if en_compra else 0,
+                        'orden_compra': orden.orden_compra,
+                        'fecha_recepcion': orden.fecha_recepcion.isoformat() if orden.fecha_recepcion else None,
+                        'disenador': orden.disenador,
+                        'observacion': orden.observacion if en_compra and orden.observacion  else '',
+                        'aprovacion': orden.aprovacion if orden.aprovacion else None,
+                        'permiso': orden.permiso if orden.permiso else None,
+                        'servicio': orden.servicio if orden.servicio else None,
+                        'en_compras':orden.create_date.isoformat() if en_compra and orden.create_date else None,
+                        'listo': orden.listo if orden.listo else None,
+                        'nesteo': orden.nesteo if orden.nesteo else None,
+                        'cliente': datos_orden.name_client,
+                        'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
+                        'product_name': datos_orden.product_name if datos_orden else None,
+                        'po_pdf_url': f'/web/content/{po_pdf.id}?mimetype=application/pdf&download=false' if po_pdf else None,
+                        'status':   'Entregado' if row.entregado else
+                                    'Comprado' if request.env['dtm.compras.realizado'].search(
+                                        [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
+                                         ('codigo', '=', row.materials_list.id)], limit=1).comprado else
+                                    'En cámino' if request.env['dtm.compras.realizado'].search(
+                                        [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
+                                         ('codigo', '=', row.materials_list.id)], limit=1) else
+                                    'En compra' if request.env['dtm.compras.requerido'].search(
+                                        [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
+                                         ('codigo', '=', row.materials_list.id)], limit=1) else
+                                    'En Almacén' if row.materials_required == 0 and row.materials_cuantity > 0 else
+                                    'En Revisión' if not row.almacen else None
+                        })
+                    cont += 1
+            else:
+                list_ordenes.append({
+                    'contador': cont,
+                    'orden_trabajo': orden.orden_trabajo,
+                    'tipo_orden': orden.tipo_orden,
+                    'revision_ot': orden.revision_ot,
+                    'proveedor_id': orden.proveedor_id.nombre if orden.proveedor_id else False,
+                    'codigo': orden.codigo,
+                    'nombre': orden.nombre,
+                    'total': orden.cantidad,
+                    'cantidad': orden.cantidad,
+                    'unitario': orden.unitario,
+                    'costo': orden.costo,
+                    'orden_compra': orden.orden_compra,
+                    'fecha_recepcion': orden.fecha_recepcion.isoformat() if orden.fecha_recepcion else None,
+                    'disenador': orden.disenador,
+                    'observacion': orden.observacion if orden.observacion else None,
+                    'aprovacion': orden.aprovacion if orden.aprovacion else None,
+                    'permiso': orden.permiso if orden.permiso else None,
+                    'servicio': orden.servicio if orden.servicio else None,
+                    'en_compras': orden.create_date.isoformat() if orden.create_date else None,
+                    'listo': orden.listo if orden.listo else None,
+                    'nesteo': orden.nesteo if orden.nesteo else None,
+                    'cliente': 'Requisición de Material',
+                    'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
+                    'product_name': datos_orden.product_name if datos_orden else None,
+                    'po_pdf_url': f'/web/content/{po_pdf.id}?mimetype=application/pdf&download=false' if po_pdf else None,
+                    'status':'En compra'
+                })
+                cont += 1
 
         # Agrupar por cliente y orden_trabajo
         agrupado = defaultdict(lambda: defaultdict(list))
@@ -105,6 +156,7 @@ class ComprasWebSiteDirections(http.Controller):
             resultado[key_to_move] = valor
         # === Fin de la parte de ordenado ===
         return resultado
+        # resultado = {'Hola':'Mundo'}
         # return request.make_response(
         #     json.dumps(resultado),
         #     headers={
