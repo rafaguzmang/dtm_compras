@@ -59,10 +59,12 @@
                 <table class="table table-sm table-bordered mt-2">
                   <thead>
                     <tr>
-                      <th style="width:8%">Código</th>
+                      <th style="width:4%">Cod.</th>
                       <th style="width:10%">Proveedor</th>
                       <th style="width:40%">Nombre</th>
-                      <th style="width:8%">Cantidad</th>
+                      <th style="width:4%">Total</th>
+                      <th style="width:4%">Apart</th>
+                      <th style="width:4%">Compr</th>
                       <th style="width:8%">Costo</th>
                       <th style="width:8%">En Compras</th>
                       <th style="width:8%">Status</th>
@@ -75,9 +77,11 @@
                         <td><t t-esc="material.codigo" /></td>
                         <td><t t-esc="material.proveedor_id or 'N/A'" /></td>
                         <td><t t-esc="material.nombre" /></td>
+                        <td><t t-esc="material.total" /></td>
+                        <td><t t-esc="material.apartado" /></td>
                         <td><t t-esc="material.cantidad" /></td>
                         <td><t t-esc="material.costo.toFixed(2)" /></td>
-                        <t t-esc="(new Date(material.en_compras)).toISOString().split('T')[0]" />
+                        <td><t t-esc="material.en_compras ? (new Date(material.en_compras)).toISOString().split('T')[0] : ''" /></td>
                         <td><t t-esc="material.status" /></td>
                         <td><t t-esc="material.observacion" /></td>
                       </tr>

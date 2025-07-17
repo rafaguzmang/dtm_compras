@@ -35,7 +35,8 @@ class ComprasWebSiteDirections(http.Controller):
                         'proveedor_id': orden.proveedor_id.nombre if en_compra and orden.proveedor_id else None,
                         'codigo': row.materials_list.id,
                         'nombre': f"{row.materials_list.nombre} {row.materials_list.medida}",
-                        'total': orden.cantidad if en_compra else row.materials_cuantity,
+                        'total': row.materials_cuantity,
+                        'apartado': row.materials_availabe,
                         'cantidad': orden.cantidad if en_compra else 0,
                         'unitario': orden.unitario if en_compra else 0,
                         'costo': orden.costo if en_compra else 0,
@@ -46,7 +47,7 @@ class ComprasWebSiteDirections(http.Controller):
                         'aprovacion': orden.aprovacion if orden.aprovacion else None,
                         'permiso': orden.permiso if orden.permiso else None,
                         'servicio': orden.servicio if orden.servicio else None,
-                        'en_compras':orden.create_date.isoformat() if en_compra and orden.create_date else None,
+                        'en_compras':orden.create_date.isoformat() if en_compra else None,
                         'listo': orden.listo if orden.listo else None,
                         'nesteo': orden.nesteo if orden.nesteo else None,
                         'cliente': datos_orden.name_client,
@@ -60,7 +61,7 @@ class ComprasWebSiteDirections(http.Controller):
                                     'En cámino' if request.env['dtm.compras.realizado'].search(
                                         [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
                                          ('codigo', '=', row.materials_list.id)], limit=1) else
-                                    'En compra' if request.env['dtm.compras.requerido'].search(
+                                    'Requerido' if request.env['dtm.compras.requerido'].search(
                                         [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
                                          ('codigo', '=', row.materials_list.id)], limit=1) else
                                     'En Almacén' if row.materials_required == 0 and row.materials_cuantity > 0 else
