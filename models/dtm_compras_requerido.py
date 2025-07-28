@@ -146,6 +146,7 @@ class Realizado(models.Model):
     _order = "id desc"
 
     orden_trabajo = fields.Char(string="Orden de Trabajo")
+    tipo_orden = fields.Char(string="Tipo", readonly=True)
     revision_ot = fields.Integer(string="VER",default=1,readonly=True) # Esto es versión
     solicitado = fields.Datetime(string='Solicitado')
     proveedor = fields.Char(string="Proveedor")

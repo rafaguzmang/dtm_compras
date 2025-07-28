@@ -14,13 +14,20 @@ class ComprasWebSiteDirections(http.Controller):
         cont = 0
         ordenes = request.env['dtm.compras.requerido'].sudo().search([])
         ordenes_unicos = list(set(ordenes.mapped('orden_trabajo')))
+        # print(ordenes_unicos)
         ordenes_filtradas = [request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',unico)],limit=1) for unico in ordenes_unicos ]
+        # print(ordenes_filtradas)
         for orden in ordenes_filtradas:
             # Se obtienen los datos de la orden
             datos_orden = request.env['dtm.odt'].sudo().search([
                 ('ot_number', '=', orden.orden_trabajo),
                 ('revision_ot', '=', orden.revision_ot)
             ])
+
+            datos_requi = request.env['dtm.requisicion'].sudo().search([
+                ('folio', '=', orden.orden_trabajo),
+            ])
+            # datos_requi and print(datos_requi)
             # Se obtiene la P.O. del modulo de ventas
             po_pdf = request.env['dtm.compras.items'].sudo().search([('orden_trabajo','=',orden.orden_trabajo)],limit=1).model_id.archivos_id
             # print(datos_orden.materials_ids)
@@ -68,36 +75,44 @@ class ComprasWebSiteDirections(http.Controller):
                                     'En Revisión' if not row.almacen else None
                         })
                     cont += 1
-            else:
-                list_ordenes.append({
-                    'contador': cont,
-                    'orden_trabajo': orden.orden_trabajo,
-                    'tipo_orden': orden.tipo_orden,
-                    'revision_ot': orden.revision_ot,
-                    'proveedor_id': orden.proveedor_id.nombre if orden.proveedor_id else False,
-                    'codigo': orden.codigo,
-                    'nombre': orden.nombre,
-                    'total': orden.cantidad,
-                    'cantidad': orden.cantidad,
-                    'unitario': orden.unitario,
-                    'costo': orden.costo,
-                    'orden_compra': orden.orden_compra,
-                    'fecha_recepcion': orden.fecha_recepcion.isoformat() if orden.fecha_recepcion else None,
-                    'disenador': orden.disenador,
-                    'observacion': orden.observacion if orden.observacion else None,
-                    'aprovacion': orden.aprovacion if orden.aprovacion else None,
-                    'permiso': orden.permiso if orden.permiso else None,
-                    'servicio': orden.servicio if orden.servicio else None,
-                    'en_compras': orden.create_date.isoformat() if orden.create_date else None,
-                    'listo': orden.listo if orden.listo else None,
-                    'nesteo': orden.nesteo if orden.nesteo else None,
-                    'cliente': 'Requisición de Material',
-                    'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
-                    'product_name': datos_orden.product_name if datos_orden else None,
-                    'po_pdf_url': f'/web/content/{po_pdf.id}?mimetype=application/pdf&download=false' if po_pdf else None,
-                    'status':'En compra'
-                })
-                cont += 1
+            elif datos_requi:
+                for row in datos_requi.material_ids:
+                    # print('Requi',row.nombre)
+                    en_compra = request.env['dtm.compras.requerido'].sudo().search(
+                        [('orden_trabajo', '=', orden.orden_trabajo), ('tipo_orden', '=', 'Requi'),
+                         ('codigo', '=', row.nombre.id)])
+                    # print(en_compra)
+                    list_ordenes.append({
+                        'contador': cont,
+                        'orden_trabajo': orden.orden_trabajo,
+                        'tipo_orden': orden.tipo_orden,
+                        'revision_ot': orden.revision_ot,
+                        'proveedor_id': en_compra.proveedor_id.nombre if en_compra.proveedor_id else False,
+                        'codigo': row.nombre.id,
+                        'nombre': row.nombre.nombre,
+                        'total': row.cantidad,
+                        'cantidad': en_compra.cantidad,
+                        'unitario': en_compra.unitario,
+                        'costo': en_compra.costo,
+                        'orden_compra': en_compra.orden_compra,
+                        'fecha_recepcion': en_compra.fecha_recepcion.isoformat() if en_compra.fecha_recepcion else None,
+                        'disenador': en_compra.disenador,
+                        'observacion': en_compra.observacion if en_compra.observacion else None,
+                        'aprovacion': en_compra.aprovacion if en_compra.aprovacion else None,
+                        'permiso': en_compra.permiso if en_compra.permiso else None,
+                        'servicio': en_compra.servicio if en_compra.servicio else None,
+                        'en_compras': en_compra.create_date.isoformat() if en_compra.create_date else None,
+                        'listo': en_compra.listo if en_compra.listo else None,
+                        'nesteo': en_compra.nesteo if en_compra.nesteo else None,
+                        'cliente': 'Requisición de Material',
+                        'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
+                        'product_name': datos_orden.product_name if datos_orden else None,
+                        'po_pdf_url': f'/web/content/{po_pdf.id}?mimetype=application/pdf&download=false' if po_pdf else None,
+                        'status':'En compra'
+                    })
+                    cont += 1
+
+            # print(list_ordenes)
 
         # Agrupar por cliente y orden_trabajo
         agrupado = defaultdict(lambda: defaultdict(list))
