@@ -103,6 +103,7 @@ class Compras(models.Model):
                 'fecha_recepcion': self.fecha_recepcion,
 
             })
+            # print(self.unitario)
             self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
 
         else:

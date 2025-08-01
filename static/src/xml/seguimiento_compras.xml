@@ -62,9 +62,9 @@
                       <th style="width:4%">Cod.</th>
                       <th style="width:10%">Proveedor</th>
                       <th style="width:40%">Nombre</th>
-                      <th style="width:4%">Total</th>
-                      <th style="width:4%">Apart</th>
-                      <th style="width:4%">Compr</th>
+                      <th style="width:4%">Req</th>
+                      <th style="width:4%">Inv</th>
+                      <th style="width:4%">Comp</th>
                       <th style="width:8%">Costo</th>
                       <th style="width:8%">En Compras</th>
                       <th style="width:8%">Status</th>
