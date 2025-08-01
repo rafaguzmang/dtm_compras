@@ -12,11 +12,12 @@ class ComprasWebSiteDirections(http.Controller):
     def get_compras(self, **kw):
         list_ordenes = []
         cont = 0
+        # Se obtienen las ordenes de modulo de compras
         ordenes = request.env['dtm.compras.requerido'].sudo().search([])
         ordenes_unicos = list(set(ordenes.mapped('orden_trabajo')))
-        # print(ordenes_unicos)
         ordenes_filtradas = [request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',unico)],limit=1) for unico in ordenes_unicos ]
-        # print(ordenes_filtradas)
+
+        # Se busca el todo el material por orden de compra o por requisición
         for orden in ordenes_filtradas:
             # Se obtienen los datos de la orden
             datos_orden = request.env['dtm.odt'].sudo().search([
@@ -33,30 +34,33 @@ class ComprasWebSiteDirections(http.Controller):
             # print(datos_orden.materials_ids)
             if datos_orden:
                 for row in datos_orden.materials_ids:
+                    # datos de requerido
                     en_compra = request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('codigo','=',row.materials_list.id)])
+                    # datos de materiales (requerido nuevo)
+                    en_material = request.env['dtm.compras.material'].sudo().search([('codigo','=',row.materials_list.id)],limit=1)
                     list_ordenes.append({
                         'contador':cont,
                         'orden_trabajo': orden.orden_trabajo,
                         'tipo_orden': orden.tipo_orden,
                         'revision_ot': orden.revision_ot,
-                        'proveedor_id': orden.proveedor_id.nombre if en_compra and orden.proveedor_id else None,
+                        'proveedor_id': en_material.proveedor_id.nombre if en_material and en_material.proveedor_id.nombre else None,
                         'codigo': row.materials_list.id,
                         'nombre': f"{row.materials_list.nombre} {row.materials_list.medida}",
                         'total': row.materials_cuantity,
                         'apartado': row.materials_availabe,
-                        'cantidad': orden.cantidad if en_compra else 0,
-                        'unitario': orden.unitario if en_compra else 0,
-                        'costo': orden.costo if en_compra else 0,
-                        'orden_compra': orden.orden_compra,
-                        'fecha_recepcion': orden.fecha_recepcion.isoformat() if orden.fecha_recepcion else None,
+                        'cantidad': row.materials_required,
+                        'unitario': en_material.unitario if en_material else 0,
+                        'costo': en_material.costo if en_material else 0,
+                        'orden_compra': en_material.orden_compra,
+                        'fecha_recepcion': en_material.fecha_recepcion.isoformat() if en_material.fecha_recepcion else None,
                         'disenador': orden.disenador,
-                        'observacion': orden.observacion if en_compra and orden.observacion  else '',
-                        'aprovacion': orden.aprovacion if orden.aprovacion else None,
-                        'permiso': orden.permiso if orden.permiso else None,
-                        'servicio': orden.servicio if orden.servicio else None,
-                        'en_compras':orden.create_date.isoformat() if en_compra else None,
-                        'listo': orden.listo if orden.listo else None,
-                        'nesteo': orden.nesteo if orden.nesteo else None,
+                        # 'observacion': en_material.observacion if en_material and orden.observacion  else '',
+                        # 'aprobacion': en_material.aprobacion if orden.aprobacion else None,
+                        'permiso': en_material.permiso if en_material.permiso else None,
+                        'servicio': en_material.servicio if en_material.servicio else None,
+                        'en_compras':en_material.create_date.isoformat() if en_material else None,
+                        # 'listo': orden.listo if orden.listo else None,
+                        # 'nesteo': orden.nesteo if orden.nesteo else None,
                         'cliente': datos_orden.name_client,
                         'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
                         'product_name': datos_orden.product_name if datos_orden else None,
@@ -81,29 +85,32 @@ class ComprasWebSiteDirections(http.Controller):
                     en_compra = request.env['dtm.compras.requerido'].sudo().search(
                         [('orden_trabajo', '=', orden.orden_trabajo), ('tipo_orden', '=', 'Requi'),
                          ('codigo', '=', row.nombre.id)])
+
+                    en_material = request.env['dtm.compras.material'].sudo().search([('codigo','=',row.nombre.id)],limit=1)
+
                     # print(en_compra)
                     list_ordenes.append({
                         'contador': cont,
                         'orden_trabajo': orden.orden_trabajo,
                         'tipo_orden': orden.tipo_orden,
                         'revision_ot': orden.revision_ot,
-                        'proveedor_id': en_compra.proveedor_id.nombre if en_compra.proveedor_id else False,
+                        'proveedor_id': en_material.proveedor_id.nombre if en_material else False,
                         'codigo': row.nombre.id,
                         'nombre': row.nombre.nombre,
                         'total': row.cantidad,
-                        'cantidad': en_compra.cantidad,
-                        'unitario': en_compra.unitario,
-                        'costo': en_compra.costo,
-                        'orden_compra': en_compra.orden_compra,
-                        'fecha_recepcion': en_compra.fecha_recepcion.isoformat() if en_compra.fecha_recepcion else None,
+                        'cantidad': row.cantidad,
+                        'unitario': en_material.unitario,
+                        'costo': en_material.costo,
+                        'orden_compra': en_material.orden_compra,
+                        'fecha_recepcion': en_material.fecha_recepcion.isoformat() if en_material.fecha_recepcion else None,
                         'disenador': en_compra.disenador,
-                        'observacion': en_compra.observacion if en_compra.observacion else None,
-                        'aprovacion': en_compra.aprovacion if en_compra.aprovacion else None,
-                        'permiso': en_compra.permiso if en_compra.permiso else None,
-                        'servicio': en_compra.servicio if en_compra.servicio else None,
-                        'en_compras': en_compra.create_date.isoformat() if en_compra.create_date else None,
-                        'listo': en_compra.listo if en_compra.listo else None,
-                        'nesteo': en_compra.nesteo if en_compra.nesteo else None,
+                        'observacion': en_material.observacion if en_material.observacion else None,
+                        'aprobacion': en_material.aprobacion if en_material.aprobacion else None,
+                        'permiso': en_material.permiso if en_material.permiso else None,
+                        # 'servicio': en_material.servicio if en_material.servicio else None,
+                        'en_compras': en_material.create_date.isoformat() if en_material.create_date else None,
+                        # 'listo': en_compra.listo if en_compra.listo else None,
+                        # 'nesteo': en_compra.nesteo if en_compra.nesteo else None,
                         'cliente': 'Requisición de Material',
                         'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
                         'product_name': datos_orden.product_name if datos_orden else None,

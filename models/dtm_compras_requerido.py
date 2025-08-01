@@ -11,132 +11,18 @@ class Compras(models.Model):
     orden_trabajo = fields.Char(string="ODT/Folio", readonly=True)
     tipo_orden = fields.Char(string="Tipo", readonly=True)
     revision_ot = fields.Integer(string="VER",default=1,readonly=True) # Esto es versión
-    proveedor_id = fields.Many2one("dtm.compras.proveedor", string="Proveedor")
     codigo = fields.Integer(string="Codigo", readonly=True)
     nombre = fields.Char(string="Nombre", readonly=True)
     cantidad = fields.Integer(string="Cantidad", readonly=True)
-    unitario = fields.Float(string="P.Unitario")
-    costo = fields.Float(string="Total", compute="_compute_costo", store=True)
-    orden_compra = fields.Char(string="Orden de Compra")
-    fecha_recepcion = fields.Date(string="Fecha  estimada de Recepción")
     disenador = fields.Char(string="Solicita", readonly=True)
-    observacion = fields.Char(string="Observaciones")
-    aprovacion = fields.Boolean(string="Aprovado")
-    permiso = fields.Boolean(compute="_compute_permiso")
-    servicio = fields.Boolean(string="Servicio", readonly=True)
-    listo = fields.Boolean()
     nesteo = fields.Boolean()
-    mostrador = fields.Float(string='Mostrador', required=True)
-    mayoreo = fields.Float(string='Mayoreo', required=True)
-
-    def action_devolver(self):
-        self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)]).id),('materials_list','=',self.codigo)]).write({'revision':False})
-
-    def _compute_permiso(self):
-        # Lógica para dar permisos de compra
-        for result in self:
-            result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
-                                                                          'ventas1@dtmindustry.com',
-                                                                          "rafaguzmang@hotmail.com",
-                                                                          "calidad2@dtmindustry.com"] else False
-    def action_enlace(self):
-        get_id = self.env['dtm.proceso'].search([("ot_number", "=", self.orden_trabajo)])
-        if len(get_id) == 1:
-            return {
-                'type': 'ir.actions.act_url',
-                'url': f'/web#id={get_id.id}&cids=2&menu_id=811&action=910&model=dtm.proceso&view_type=form',
-                # 'target': 'self',  # Abre la URL en la misma ventana
-            }
-        else:
-            return {
-                'type': 'ir.actions.act_url',
-                'url': f'/web#action=910&model=dtm.proceso&view_type=list&cids=2&menu_id=811&ordenes={self.orden_trabajo}',
-                # 'target': 'self',  # Abre la URL en la misma ventana
-            }
-
-    @api.depends("cantidad", "unitario")
-    def _compute_costo(self):
-        for result in self:
-            result.costo = result.cantidad * result.unitario
-
-    def action_done(self):
-        # Pasa la información a compras realizado
-
-        if self.tipo_orden == 'Cotización':
-            ventas = self.env['dtm.cotizacion.materiales'].search([('material_id','=',self.codigo)],limit=1)
-            if ventas:
-                ventas.write({'precio': self.unitario,'mayoreo':self.mayoreo })
-                self.unlink()
-        elif self.proveedor_id.nombre and self.unitario and self.orden_compra and self.fecha_recepcion:
-            vals = {
-                "proveedor": self.proveedor_id.nombre,
-                "codigo": self.codigo,
-                "descripcion": self.nombre,
-                "cantidad": self.cantidad,
-                "fecha_recepcion": self.fecha_recepcion,
-                "orden_trabajo": self.orden_trabajo,
-                "revision_ot": self.revision_ot,
-                # "unitario": self.unitario,
-                # "aprovacion": self.aprovacion and "Aprobado",
-            }
-            get_control = self.env['dtm.control.entradas'].search(
-                [("codigo", "=", self.codigo),('orden_trabajo','=',self.orden_trabajo),('revision_ot','=',self.revision_ot)])
-
-            get_control.write(vals) if get_control else get_control.create(vals)
-            model_id = self.env['dtm.requisicion'].search([('folio','=',int(self.orden_trabajo))])
-            req_material = self.env['dtm.requisicion.material'].search([('model_id','=',model_id.id),('codigo','=',self.codigo)])
-            req_material.write({'comprado':True}) if req_material else None
-            self.env['dtm.compras.realizado'].create({
-                'orden_trabajo': self.orden_trabajo,
-                "revision_ot": self.revision_ot,
-                "solicitado": self.create_date,
-                'proveedor': self.proveedor_id.nombre,
-                'codigo': self.codigo,
-                'nombre': self.nombre,
-                'cantidad': self.cantidad,
-                "mostrador": self.mostrador,
-                "mayoreo": self.mayoreo,
-                'unitario':self.unitario,
-                'costo': self.costo,
-                'orden_compra': self.orden_compra,
-                'fecha_compra': datetime.datetime.today(),
-                'fecha_recepcion': self.fecha_recepcion,
-
-            })
-            self.env.cr.execute("DELETE FROM dtm_compras_requerido WHERE id=" + str(self._origin.id))
-
-        else:
-            raise ValidationError("Campos obligatorios:\n"
-                                  "- Proveedor.\n"
-                                  "- Unitario.\n"
-                                  "- Orden de compra del proveedor.\n"
-                                  "- Fecha de recepción.\n")
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras, self).get_view(view_id, view_type, **options)
-        get_info = self.env['dtm.compras.requerido'].search([])
+
 
          # Quita los campos borrados de sus respectivas ordenes
-        for orden in get_info:
-            # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
-            # print(orden.orden_trabajo,orden.revision_ot,orden.tipo_orden,orden.codigo)
-            if orden.tipo_orden != 'Cotización':
-                get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]) else 0),('materials_list','=',orden.codigo)],limit=1)
-                get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
-                get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
-                list_serv = []
-                [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
 
-                # Si el item no se encontro se borra de compras
-                if not get_odt and not get_req and not orden.codigo in list_serv:
-                    orden.unlink()
-
-                # Borra si el item a comprar es cero
-                if get_odt and get_odt.materials_required == 0:
-                    orden.unlink()
-
-                elif get_req and get_req.cantidad == 0:
-                    orden.unlink()
         return res
 
 
@@ -204,3 +90,156 @@ class Proveedor(models.Model):
     _rec_name = "nombre"
 
     nombre = fields.Char(string="Nombre")
+
+class SoloMaterial(models.Model):
+    _name = "dtm.compras.material"
+    _description = "Modelo para llevar acabo la suma de los materiales repetidos de diferentes ordenes"
+
+    proveedor_id = fields.Many2one("dtm.compras.proveedor", string="Proveedor")
+    codigo = fields.Integer(string="Codigo", readonly=True)
+    nombre = fields.Char(string="Nombre", readonly=True)
+    cantidad = fields.Integer(string="Cantidad", readonly=True)
+    unitario = fields.Float(string="P.Unitario")
+    costo = fields.Float(string="Total", compute="_compute_costo", store=True)
+    orden_compra = fields.Char(string="Orden de Compra")
+    fecha_recepcion = fields.Date(string="Fecha de estimada")
+    observacion = fields.Char(string="Observaciones")
+    aprobacion = fields.Boolean(string="Aprovado")
+    permiso = fields.Boolean(compute="_compute_permiso")
+    servicio = fields.Boolean(string="Servicio", readonly=True)
+    mostrador = fields.Float(string='Mostrador')
+    mayoreo = fields.Float(string='Mayoreo')
+
+
+    def _compute_permiso(self):
+        # Lógica para dar permisos de compra
+        for result in self:
+            result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
+                                                                          'ventas1@dtmindustry.com',
+                                                                          "rafaguzmang@hotmail.com",
+                                                                          "calidad2@dtmindustry.com"] else False
+
+
+    @api.depends("cantidad", "unitario")
+    def _compute_costo(self):
+        for result in self:
+            result.costo = result.cantidad * result.unitario
+
+    def action_done(self):
+        # Pasa la información a compras realizado
+
+        # Pasa cotización al modulo de ventas y borra la solicitud de compras requerido
+        if 'Cotización' in self.env['dtm.compras.requerido'].search([('codigo','=',self.codigo)]).mapped('tipo_orden'):
+            ventas = self.env['dtm.cotizacion.materiales'].search([('material_id', '=', self.codigo)], limit=1)
+            if ventas:
+                ventas.write({'precio': self.unitario, 'mayoreo': self.mayoreo})
+                self.unlink()
+
+        elif self.permiso:
+            get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',self.codigo)])
+            for material in get_requerido:
+                vals = {
+                    'orden_trabajo':material.orden_trabajo,
+                    'tipo_orden':material.tipo_orden,
+                    'revision_ot':material.revision_ot,
+                    'solicitado':material.create_date,
+                    'proveedor':self.proveedor_id.nombre,
+                    'codigo':self.codigo,
+                    'nombre':self.nombre,
+                    'cantidad':material.cantidad,
+                    'unitario':self.unitario,
+                    'costo':self.costo,
+                    'orden_compra':self.orden_compra if self.orden_compra else 'N/A',
+                    'fecha_compra':datetime.datetime.today(),
+                    'mostrador':self.mostrador,
+                    'mayoreo':self.mayoreo,
+
+                }
+                # Pasa la información a realizados
+                self.env['dtm.compras.realizado'].create(vals)
+
+                vals = {
+                    "codigo": self.codigo,
+                    "orden_trabajo": material.orden_trabajo,
+                    "revision_ot": material.revision_ot,
+                    "proveedor": self.proveedor_id.nombre,
+                    "descripcion": self.nombre,
+                    "cantidad": material.cantidad,
+                    "fecha_recepcion": self.fecha_recepcion,
+                }
+                # Se manda la información a en transito para la espera del material
+                self.env['dtm.control.entradas'].search([]).create(vals)
+                # Si es una requisición pondrá el status de comprado
+                model_id = self.env['dtm.requisicion'].search([('folio', '=', int(material.orden_trabajo))])
+                req_material = self.env['dtm.requisicion.material'].search(
+                    [('model_id', '=', model_id.id), ('codigo', '=', self.codigo)])
+                req_material.write({'comprado': True}) if req_material else None
+                # Se borra el material de requerido
+                material.unlink()
+            # Se quita la fila de este modelo
+            self.unlink()
+
+
+    def get_view(self, view_id=None, view_type='form', **options):
+        res = super(SoloMaterial, self).get_view(view_id, view_type, **options)
+        # Se obtienen todos los datos de requerido
+        get_materiales = self.env['dtm.compras.requerido'].search([])
+        # Se hace un set para quitar repetidos
+        set_list = list(set(get_materiales.mapped('codigo')))
+        # Se obtienen los datos de los materiales más la suma de las cantidades
+        for codigo in set_list:
+            material_data = self.env['dtm.compras.requerido'].search([('codigo','=',codigo)],limit=1)
+            material_suma = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=','Cotización')])
+            get_self = self.env['dtm.compras.material'].search([('codigo','=',codigo)])
+            vals = {
+                'codigo':codigo,
+                'nombre':material_data.nombre,
+                'cantidad':sum(material_suma.mapped('cantidad')),
+            }
+
+            get_self.write(vals) if get_self else get_self.create(vals)
+
+        # Se encarga de la cotizaciones solicitadas por ventas
+        for codigo in set_list:
+            material_data = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','=','Cotización')],limit=1)
+            if material_data:
+                # print(material_data)
+                get_self = self.env['dtm.compras.material'].search([('codigo','=',codigo),('observacion','=','Cotizar')])
+                vals = {
+                    'codigo':codigo,
+                    'nombre':material_data.nombre,
+                    'cantidad':1,
+                    'observacion':'Cotizar',
+                    'fecha_recepcion':datetime.datetime.today(),
+                    'orden_compra':'Cotizar',
+                }
+#                 print('get_self',get_self)
+                get_self.write(vals) if get_self else get_self.create(vals)
+
+
+
+        #Quita ordenes que tengan material cero o que se borrarón
+        get_info = self.env['dtm.compras.requerido'].search([])
+        for orden in get_info:
+            # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
+            # print(orden.orden_trabajo,orden.revision_ot,orden.tipo_orden,orden.codigo)
+            if orden.tipo_orden != 'Cotización':
+                get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]) else 0),('materials_list','=',orden.codigo)],limit=1)
+                get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
+                get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
+                list_serv = []
+                [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
+
+                # Si el item no se encontro se borra de compras
+                if not get_odt and not get_req and not orden.codigo in list_serv:
+                    orden.unlink()
+
+                # Borra si el item a comprar es cero
+                if get_odt and get_odt.materials_required == 0:
+                    orden.unlink()
+
+                elif get_req and get_req.cantidad == 0:
+                    orden.unlink()
+
+
+        return res
