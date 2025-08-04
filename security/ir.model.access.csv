@@ -7,6 +7,8 @@ access_dtm_compras_servicios,access.dtm.compras.servicios,model_dtm_compras_serv
 
 access_dtm_compras_precios,access.dtm.compras.precios,model_dtm_compras_precios,base.group_user,1,1,1,1
 
+access_dtm_compras_material,access.dtm.compras.material,model_dtm_compras_material,base.group_user,1,1,1,1
+
 
 
 

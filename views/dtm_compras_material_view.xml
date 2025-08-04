@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="dtm_compras_material_tree_view" model="ir.ui.view">
+            <field name="name">dtm.compras.material.tree</field>
+            <field name="model">dtm.compras.material</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom" delete="false">
+                    <field name="proveedor_id" options="{'no_open':True}"/>
+                    <field name="codigo" options="{'no_open':True}"/>
+                    <field name="nombre"/>
+                    <field name="cantidad"/>
+                    <field name="mostrador"/>
+                    <field name="mayoreo"/>
+                    <field name="unitario"/>
+                    <field name="costo"/>
+                    <field name="permiso" invisible = "1"/>
+                    <field name="orden_compra"/>
+                    <field name="fecha_recepcion"/>
+                    <field name="observacion"/>
+                    <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
+                            attrs="{'invisible': ['|','|','|','|',('costo','=',0),('proveedor_id','=',False),('mostrador','=',0),('mayoreo','=',0),('fecha_recepcion','=',False)]}"/>
+<!--                    <field name="listo" invisible="1"/>-->
+                </tree>
+            </field>
+        </record>
+
+<!--        <record id="dtm_compras_material_search_view" model="ir.ui.view">-->
+<!--            <field name="name">dtm.compras.material.search</field>-->
+<!--            <field name="model">dtm.compras.material</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <search string="ModelTitle">-->
+<!--                    <group expand="1" string="Group By">-->
+<!--                        <filter string="Example Field" name="example_field" domain="[]" context="{'group_by':'example_field'}"/>-->
+<!--                    </group>-->
+<!--               </search>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="dtm_compras_material_act_window" model="ir.actions.act_window">
+            <field name="name">Requerido</field>
+            <field name="res_model">dtm.compras.material</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+<!--        <menuitem id="dtm_compras_material_menu" action="dtm_compras_material_act_window"/>-->
+
+    </data>
+</odoo>

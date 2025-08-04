@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
      <menuitem name="Compras" id="menu_root_dtm_compras">
-            <menuitem id="dtm_compras_requerido_menu" action="dtm_compras.dtm_compras_requerido_accion" />
+            <menuitem id="dtm_compras_material_menu" action="dtm_compras_material_act_window"/>
+<!--            <menuitem id="dtm_compras_requerido_menu" action="dtm_compras.dtm_compras_requerido_accion" />-->
             <menuitem id="dtm_compras_realizado_menu" action="dtm_compras.dtm_compras_realizado_accion" />
             <menuitem id="dtm_compras_servicios_action_menu" action="dtm_compras.dtm_compras_servicios_action"/>
             <menuitem id="dtm_compras_precios_menu" action="dtm_compras_precios_accion" />
