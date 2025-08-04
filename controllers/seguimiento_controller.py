@@ -32,6 +32,7 @@ class ComprasWebSiteDirections(http.Controller):
             # Se obtiene la P.O. del modulo de ventas
             po_pdf = request.env['dtm.compras.items'].sudo().search([('orden_trabajo','=',orden.orden_trabajo)],limit=1).model_id.archivos_id
             # print(datos_orden.materials_ids)
+            # si es orden de servicio
             if datos_orden:
                 for row in datos_orden.materials_ids:
                     # datos de requerido
@@ -60,7 +61,7 @@ class ComprasWebSiteDirections(http.Controller):
                         'servicio': en_material.servicio if en_material.servicio else None,
                         'en_compras':en_material.create_date.isoformat() if en_material else None,
                         # 'listo': orden.listo if orden.listo else None,
-                        # 'nesteo': orden.nesteo if orden.nesteo else None,
+                        'nesteo': orden.nesteo if orden.nesteo else None,
                         'cliente': datos_orden.name_client,
                         'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
                         'product_name': datos_orden.product_name if datos_orden else None,
