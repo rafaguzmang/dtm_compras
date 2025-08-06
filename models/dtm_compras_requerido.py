@@ -218,7 +218,7 @@ class SoloMaterial(models.Model):
 
 
 
-        #Quita ordenes que tengan material cero o que se borrarón
+        #Quita ordenes que tengan material cero o que se borrarón de la versión vieja de Requerido
         get_info = self.env['dtm.compras.requerido'].search([])
         for orden in get_info:
             # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
@@ -240,6 +240,15 @@ class SoloMaterial(models.Model):
 
                 elif get_req and get_req.cantidad == 0:
                     orden.unlink()
+
+        #Quita los materiales que ya no existan en la nueva versión de requerido
+        get_self = self.env['dtm.compras.material'].search([]).mapped('codigo')
+        get_re = self.env['dtm.compras.requerido'].search([]).mapped('codigo')
+
+
+        borrado_list = list(filter(lambda row: row not in get_re,get_self))
+        self.env['dtm.compras.material'].search([('codigo','in',borrado_list)]).unlink()
+
 
 
         return res

@@ -189,8 +189,6 @@ class ComprasWebSiteDirections(http.Controller):
         #     }
         # )
 
-
-
 class CompradoWebSite(http.Controller):
     @http.route('/dtm_comprado/get_data', type='json', auth='public', csrf=False)
     def get_compras(self, **kw):
