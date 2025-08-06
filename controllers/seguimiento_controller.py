@@ -111,7 +111,7 @@ class ComprasWebSiteDirections(http.Controller):
                         # 'servicio': en_material.servicio if en_material.servicio else None,
                         'en_compras': en_material.create_date.isoformat() if en_material.create_date else None,
                         # 'listo': en_compra.listo if en_compra.listo else None,
-                        # 'nesteo': en_compra.nesteo if en_compra.nesteo else None,
+                        'nesteo': True,
                         'cliente': 'Requisición de Material',
                         'date_rel': datos_orden.date_rel.isoformat() if datos_orden.date_rel else None,
                         'product_name': datos_orden.product_name if datos_orden else None,
