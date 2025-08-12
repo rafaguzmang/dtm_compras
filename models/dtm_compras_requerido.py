@@ -227,11 +227,11 @@ class SoloMaterial(models.Model):
                 get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]) else 0),('materials_list','=',orden.codigo)],limit=1)
                 get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
                 get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
-                list_serv = []
+                # list_serv = []
                 # [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
 
                 # Si el item no se encontro se borra de compras
-                if not get_odt and not get_req and not orden.codigo in list_serv:
+                if not get_odt and not get_req:
                     orden.unlink()
 
                 # Borra si el item a comprar es cero
@@ -248,7 +248,5 @@ class SoloMaterial(models.Model):
 
         borrado_list = list(filter(lambda row: row not in get_re,get_self))
         self.env['dtm.compras.material'].search([('codigo','in',borrado_list)]).unlink()
-
-
 
         return res
