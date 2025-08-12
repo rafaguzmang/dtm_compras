@@ -228,7 +228,7 @@ class SoloMaterial(models.Model):
                 get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
                 get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
                 list_serv = []
-                [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
+                # [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
 
                 # Si el item no se encontro se borra de compras
                 if not get_odt and not get_req and not orden.codigo in list_serv:
