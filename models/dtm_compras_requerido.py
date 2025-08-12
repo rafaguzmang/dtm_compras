@@ -62,8 +62,9 @@ class Realizado(models.Model):
         for codigo in get_realizado:
             record = self.env['dtm.compras.realizado'].search([('codigo', '=', codigo)], limit=1, order='id desc')
             if codigo in self.env['dtm.compras.precios'].search([]).mapped('codigo'):
-                self.env['dtm.compras.precios'].search([('codigo', '=', record.codigo)]).write(
-                    {'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
+                if self.env['dtm.compras.realizado'].search([('codigo','=',codigo)], limit=1, order='id desc').tipo_orden not in ['OT','NPI']:
+                    self.env['dtm.compras.precios'].search([('codigo', '=', record.codigo)]).write(
+                        {'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
             else:
                 self.env['dtm.compras.precios'].create(
                     {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
@@ -119,7 +120,6 @@ class SoloMaterial(models.Model):
                                                                           "rafaguzmang@hotmail.com",
                                                                           "calidad2@dtmindustry.com"] else False
 
-
     @api.depends("cantidad", "unitario")
     def _compute_costo(self):
         for result in self:
@@ -136,6 +136,12 @@ class SoloMaterial(models.Model):
                 self.unlink()
 
         elif self.permiso:
+            # Se manda el precio mostrador y mayoreo a la tabla de materiales
+            get_material = self.env['dtm.materiales'].search([('id','=',self.codigo)])
+            if get_material:
+                print(get_material)
+                get_material.write({'mostrador':self.mostrador,'mayoreo':self.mayoreo})
+
             get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',self.codigo)])
             for material in get_requerido:
                 vals = {
