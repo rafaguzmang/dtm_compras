@@ -14,7 +14,6 @@
             <field name="model">dtm.compras.requerido</field>
             <field name="arch" type="xml">
                 <tree editable="bottom">
-
                     <field name="orden_trabajo"/>
                     <field name="tipo_orden"/>
                     <field name="revision_ot"/>
@@ -23,7 +22,6 @@
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
-
                 </tree>
             </field>
         </record>

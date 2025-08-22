@@ -51,6 +51,7 @@
                     <field name="fecha_recepcion"/>
                     <field name="fecha_compra"/>
                     <field name="comprado"/>
+                    <field name="autoriza"/>
                 </tree>
             </field>
         </record>
