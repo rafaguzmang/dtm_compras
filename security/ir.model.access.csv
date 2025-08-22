@@ -9,6 +9,8 @@ access_dtm_compras_precios,access.dtm.compras.precios,model_dtm_compras_precios,
 
 access_dtm_compras_material,access.dtm.compras.material,model_dtm_compras_material,base.group_user,1,1,1,1
 
+access_dtm_compras_confirm_wizard,access.dtm.compras.confirm.wizard,model_dtm_compras_confirm_wizard,base.group_user,1,1,1,1
+
 
 
 

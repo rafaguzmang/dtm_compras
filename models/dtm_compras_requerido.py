@@ -49,6 +49,7 @@ class Realizado(models.Model):
     aprovacion = fields.Char(string="Aprovado", readonly=True)
     mostrador = fields.Float(string='Mostrador', readonly=True)
     mayoreo = fields.Float(string='Mayoreo', readonly=True)
+    autoriza = fields.Char(string='Autorizó',readonly=True)
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado, self).get_view(view_id, view_type, **options)
@@ -110,11 +111,13 @@ class SoloMaterial(models.Model):
     servicio = fields.Boolean(string="Servicio", readonly=True)
     mostrador = fields.Float(string='Mostrador')
     mayoreo = fields.Float(string='Mayoreo')
+    user = fields.Char()
 
 
     def _compute_permiso(self):
         # Lógica para dar permisos de compra
         for result in self:
+            result.user = self.env.user.partner_id.name
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
                                                                           'ventas1@dtmindustry.com',
                                                                           "rafaguzmang@hotmail.com",
@@ -124,6 +127,17 @@ class SoloMaterial(models.Model):
     def _compute_costo(self):
         for result in self:
             result.costo = result.cantidad * result.unitario
+
+    def action_wizard(self):
+        return{
+            'name': 'Confirmar Compra',
+            'type': 'ir.actions.act_window',
+            'res_model':'dtm.compras.confirm.wizard',
+            'view_mode':'form',
+            'view_id':self.env.ref('dtm_compras.view_compras_confirm_wizard').id,
+            'target':'new',
+            'context':{'default_compra_id':self.id},
+        }
 
     def action_done(self):
         # Pasa la información a compras realizado
@@ -139,7 +153,7 @@ class SoloMaterial(models.Model):
             # Se manda el precio mostrador y mayoreo a la tabla de materiales
             get_material = self.env['dtm.materiales'].search([('id','=',self.codigo)])
             if get_material:
-                print(get_material)
+                # print(get_material)
                 get_material.write({'mostrador':self.mostrador,'mayoreo':self.mayoreo})
 
             get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',self.codigo)])
@@ -159,6 +173,7 @@ class SoloMaterial(models.Model):
                     'fecha_compra':datetime.datetime.today(),
                     'mostrador':self.mostrador,
                     'mayoreo':self.mayoreo,
+                    'autoriza':self.user,
 
                 }
                 # Pasa la información a realizados
@@ -188,72 +203,115 @@ class SoloMaterial(models.Model):
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(SoloMaterial, self).get_view(view_id, view_type, **options)
-        # Se obtienen todos los datos de requerido
-        get_materiales = self.env['dtm.compras.requerido'].search([])
-        # Se hace un set para quitar repetidos
-        set_list = list(set(get_materiales.mapped('codigo')))
-        # Se obtienen los datos de los materiales más la suma de las cantidades del material indirecto
-        for codigo in set_list:
-            material_data = self.env['dtm.compras.requerido'].search([('codigo','=',codigo)],limit=1)
-            material_suma = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=',('Cotización'))])
-            get_self = self.env['dtm.compras.material'].search([('codigo','=',codigo)])
+
+        Requerido = self.env['dtm.compras.requerido']
+        Material = self.env['dtm.compras.material']
+
+        # 1️⃣ Obtener sumas de materiales no Cotización usando read_group
+        materiales_suma = Requerido.read_group(
+            [('tipo_orden', '!=', 'Cotización')],
+            fields=['codigo', 'cantidad'],
+            groupby=['codigo']
+        )
+
+        # 2️⃣ Obtener todas las Cotizaciones
+        cotizaciones = Requerido.search([('tipo_orden', '=', 'Cotización')])
+
+        # 3️⃣ Materiales existentes en dtm.compras.material de manera masiva
+        todos_codigos = list(set([m['codigo'] for m in materiales_suma] + cotizaciones.mapped('codigo')))
+        materiales_existentes = Material.search([('codigo', 'in', todos_codigos)])
+        materiales_dict = {m.codigo: m for m in materiales_existentes}
+
+        # 4️⃣ Actualizar o crear materiales no Cotización
+        for m in materiales_suma:
+            codigo = m['codigo']
+            nombre = Requerido.search([('codigo', '=', codigo)], limit=1).nombre
             vals = {
-                'codigo':codigo,
-                'nombre':material_data.nombre,
-                'cantidad':sum(material_suma.mapped('cantidad')),
+                'codigo': codigo,
+                'cantidad': m['cantidad'],
+                'nombre': nombre
             }
+            if codigo in materiales_dict:
+                materiales_dict[codigo].write(vals)
+            else:
+                Material.create(vals)
 
-            get_self.write(vals) if get_self else get_self.create(vals)
+        # 5️⃣ Actualizar o crear Cotizaciones
+        for cot in cotizaciones:
+            codigo = cot.codigo
+            vals = {
+                'codigo': codigo,
+                'nombre': cot.nombre,
+                'cantidad': 1,
+                'observacion': 'Cotizar',
+                'fecha_recepcion': datetime.datetime.today(),
+                'orden_compra': 'Cotizar'
+            }
+            if codigo in materiales_dict:
+                materiales_dict[codigo].write(vals)
+            else:
+                Material.create(vals)
 
+        # 6️⃣ Limpiar materiales que ya no existen en Requerido
+        codigos_requerido = set(Requerido.mapped('codigo'))
+        codigos_material = set(Material.mapped('codigo'))
+        codigos_borrar = list(codigos_material - codigos_requerido)
+        if codigos_borrar:
+            Material.search([('codigo', 'in', codigos_borrar)]).unlink()
 
-        # Se encarga de la cotizaciones solicitadas por ventas
-        for codigo in set_list:
-            material_data = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','=','Cotización')],limit=1)
-            if material_data:
-                # print(material_data)
-                get_self = self.env['dtm.compras.material'].search([('codigo','=',codigo),('observacion','=','Cotizar')])
-                vals = {
-                    'codigo':codigo,
-                    'nombre':material_data.nombre,
-                    'cantidad':1,
-                    'observacion':'Cotizar',
-                    'fecha_recepcion':datetime.datetime.today(),
-                    'orden_compra':'Cotizar',
-                }
-#                 print('get_self',get_self)
-                get_self.write(vals) if get_self else get_self.create(vals)
+        # 7️⃣ Limpiar registros con cantidad cero
+        cero_materiales = Material.search([('cantidad', '=', 0)])
+        if cero_materiales:
+            cero_materiales.unlink()
 
-
-
-        #Quita ordenes que tengan material cero o que se borrarón de la versión vieja de Requerido
-        get_info = self.env['dtm.compras.requerido'].search([])
-        for orden in get_info:
-            # Se busca el item de la orden en las tablas materials.line, requisicion.material y odt
-            # print(orden.orden_trabajo,orden.revision_ot,orden.tipo_orden,orden.codigo)
-            if orden.tipo_orden != 'Cotización':
-                get_odt = self.env['dtm.materials.line'].search([('model_id','=',self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('tipe_order','=',orden.tipo_orden)]).id if self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]) else 0),('materials_list','=',orden.codigo)],limit=1)
-                get_req = self.env['dtm.requisicion.material'].search([('model_id','=',self.env['dtm.requisicion'].search([('folio','=',orden.orden_trabajo)]).id),('nombre','=',orden.codigo)])
-                get_serv = self.env['dtm.odt'].search([('ot_number','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot)]).maquinados_id
-                # list_serv = []
-                # [list_serv.extend(item.material_id.materials_list.mapped('id')) for item in get_serv]
-
-                # Si el item no se encontro se borra de compras
-                if not get_odt and not get_req:
-                    orden.unlink()
-
-                # Borra si el item a comprar es cero
-                if get_odt and get_odt.materials_required == 0:
-                    orden.unlink()
-
-                elif get_req and get_req.cantidad == 0:
-                    orden.unlink()
-
-        #Quita los materiales que ya no existan en la nueva versión de requerido
-        get_self = self.env['dtm.compras.material'].search([]).mapped('codigo')
-        get_re = self.env['dtm.compras.requerido'].search([]).mapped('codigo')
+        return res
 
 
-        borrado_list = list(filter(lambda row: row not in get_re,get_self))
-        self.env['dtm.compras.material'].search([('codigo','in',borrado_list)]).unlink()
+class CompraConfirmacionWizard(models.TransientModel):
+    _name = "dtm.compras.confirm.wizard"
+    _description = "Ventana de diálogo para la confirmación de una compra"
+
+    compra_id = fields.Many2one(
+        'dtm.compras.material',
+        string='Compra',
+        readonly=True,
+        required=True
+    )
+
+    costo = fields.Float(string='Consto', readonly=True)
+    total = fields.Float(string='Total', readonly=True)
+    material = fields.Char(string='Material', readonly=True)
+    codigo = fields.Integer(string='Código', readonly=True)
+    ordenes = fields.Text(string='Orden', readonly=True)
+    cantidad = fields.Text(string='cantidad', readonly=True)
+    proveedor = fields.Text(string='Proveedor', readonly=True)
+
+    def action_confirmar_compra(self):
+        if self.compra_id:
+            self.compra_id.action_done()
+        return {'type': 'ir.actions.act_window_close'}
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        compra_id = self.env.context.get('default_compra_id')
+        if compra_id:
+            get_codigo = self.env['dtm.compras.material'].browse(compra_id)
+            # Asignar valores al diccionario res, no a self
+            res['compra_id'] = get_codigo.id
+            res['costo'] = get_codigo.costo
+            res['total'] = get_codigo.unitario
+            res['material'] = get_codigo.nombre
+            res['cantidad'] = get_codigo.cantidad
+            res['proveedor'] = get_codigo.proveedor_id.nombre
+
+            # Si quieres recorrer las órdenes
+            get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', get_codigo.codigo)])
+            ordenes = ''
+            for result in get_material:
+                get_orden = self.env['dtm.odt'].search([('ot_number','=',result.orden_trabajo)],limit=1)
+                ordenes += f'{result.orden_trabajo} - {get_orden.product_name} - {get_orden.name_client} - {result.disenador} - {result.cantidad} {"Falta Nesteo" if not result.nesteo else ""}\n'
+
+            res['ordenes'] = ordenes
 
         return res

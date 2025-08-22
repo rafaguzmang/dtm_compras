@@ -16,6 +16,7 @@
         'views/dtm_compras_precios_view.xml',
         'views/seguimiento_compras_view.xml',
         'views/dtm_compras_material_view.xml',
+        'views/dtm_compra_confirm_wizard.xml',
         # Angular assets
         # 'views/angular_assets.xml',
         # Menú

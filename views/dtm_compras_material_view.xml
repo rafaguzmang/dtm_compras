@@ -6,7 +6,7 @@
             <field name="name">dtm.compras.material.tree</field>
             <field name="model">dtm.compras.material</field>
             <field name="arch" type="xml">
-                <tree editable="bottom" delete="false">
+                <tree editable="bottom" delete="true">
                     <field name="proveedor_id" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
@@ -19,7 +19,7 @@
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <field name="observacion"/>
-                    <button name="action_done" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
+                    <button name="action_wizard" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
                             attrs="{'invisible': ['|','|','|','|',('costo','=',0),('proveedor_id','=',False),('mostrador','=',0),('mayoreo','=',0),('fecha_recepcion','=',False)]}"/>
 <!--                    <field name="listo" invisible="1"/>-->
                 </tree>
