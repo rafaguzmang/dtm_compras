@@ -195,7 +195,7 @@ class SoloMaterial(models.Model):
         # Se obtienen los datos de los materiales más la suma de las cantidades del material indirecto
         for codigo in set_list:
             material_data = self.env['dtm.compras.requerido'].search([('codigo','=',codigo)],limit=1)
-            material_suma = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','in',['OT','NPI'])])
+            material_suma = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=',('Cotización'))])
             get_self = self.env['dtm.compras.material'].search([('codigo','=',codigo)])
             vals = {
                 'codigo':codigo,
@@ -204,18 +204,7 @@ class SoloMaterial(models.Model):
             }
 
             get_self.write(vals) if get_self else get_self.create(vals)
-        # Se obtienen los datos de los materiales más la suma de las cantidades del material directo
-        for codigo in set_list:
-            material_data = self.env['dtm.compras.requerido'].search([('codigo','=',codigo)],limit=1)
-            material_suma = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','=','Requi')])
-            get_self = self.env['dtm.compras.material'].search([('codigo','=',codigo)])
-            vals = {
-                'codigo':codigo,
-                'nombre':material_data.nombre,
-                'cantidad':sum(material_suma.mapped('cantidad')),
-            }
 
-            get_self.write(vals) if get_self else get_self.create(vals)
 
         # Se encarga de la cotizaciones solicitadas por ventas
         for codigo in set_list:
