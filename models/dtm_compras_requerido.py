@@ -206,7 +206,7 @@ class SoloMaterial(models.Model):
         Requerido = self.env['dtm.compras.requerido']
         Material = self.env['dtm.compras.material']
 
-        # 1️⃣ Obtener sumas de materiales no Cotización usando read_group
+        # 1️⃣ Obtener sumas de materiales No Cotización usando read_group
         materiales_suma = Requerido.read_group(
             [('tipo_orden', '!=', 'Cotización')],
             fields=['codigo', 'cantidad'],
