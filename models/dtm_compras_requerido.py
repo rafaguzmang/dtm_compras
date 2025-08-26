@@ -120,7 +120,6 @@ class SoloMaterial(models.Model):
             result.user = self.env.user.partner_id.name
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
                                                                           'ventas1@dtmindustry.com',
-                                                                          "rafaguzmang@hotmail.com",
                                                                           "calidad2@dtmindustry.com"] else False
 
     @api.depends("cantidad", "unitario")
