@@ -1,3 +1,5 @@
+from re import search
+
 from odoo import fields, models, api
 import datetime
 import re
@@ -203,65 +205,58 @@ class SoloMaterial(models.Model):
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(SoloMaterial, self).get_view(view_id, view_type, **options)
 
-        Requerido = self.env['dtm.compras.requerido']
-        Material = self.env['dtm.compras.material']
+        requerido = self.env['dtm.compras.requerido'].search([])
+        material = self.env['dtm.compras.material'].search([])
+        # Vamos a quitar los items que ya fueron borrados de sus respectivas ordenes o en cantidad son cero
+        for item in requerido:
+            get_odt = self.env['dtm.odt'].search([('ot_number','=',item.orden_trabajo),('tipe_order','=',item.tipo_orden),('revision_ot','=',item.revision_ot)])
+            get_materials_line = self.env['dtm.materials.line'].search([('model_id','=',get_odt.id),('materials_list','=',item.codigo)])
+            get_requi = self.env['dtm.requisicion'].search([('folio', '=', item.orden_trabajo)])
+            get_requi_list = self.env['dtm.requisicion.material'].search([('model_id', '=', get_requi.id), ('codigo', '=', item.codigo)])
+            if (not get_materials_line and not get_requi_list) or item.cantidad == 0 :
+               item.unlink()
+        for item in material:
+            get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',item.codigo),('nombre','=',item.nombre)])
+            item.unlink() if not get_requerido else None
 
-        # 1️⃣ Obtener sumas de materiales No Cotización usando read_group
-        materiales_suma = Requerido.read_group(
-            [('tipo_orden', '!=', 'Cotización')],
-            fields=['codigo', 'cantidad'],
-            groupby=['codigo']
-        )
+        # Se recorre un set con los códigos de requerido para hacer la suma de las cantidades a comprar
+        set_requerido = list(set(requerido.mapped('codigo')))
+        for codigo in set_requerido:
+            suma = sum(self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=','Requi')]).mapped('cantidad'))
+            get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=','Requi')],limit=1)
+            get_requi = self.env['dtm.compras.requerido'].search([('codigo', '=', codigo), ('tipo_orden', '=', 'Requi')], limit=1)
+            if get_requerido:
+                vals = {
+                    'codigo': codigo,
+                    'nombre': get_requerido.nombre,
+                    'cantidad': suma,
 
-        # 2️⃣ Obtener todas las Cotizaciones
-        cotizaciones = Requerido.search([('tipo_orden', '=', 'Cotización')])
+                }
+                get_material = self.env['dtm.compras.material'].search([('codigo','=',codigo),('nombre','=',get_requerido.nombre)],limit=1)
+                get_material.write(vals) if get_material else get_material.create(vals)
+            elif get_requi:
+                vals = {
+                    'codigo': codigo,
+                    'nombre': get_requi.nombre,
+                    'cantidad': get_requi.cantidad,
 
-        # 3️⃣ Materiales existentes en dtm.compras.material de manera masiva
-        todos_codigos = list(set([m['codigo'] for m in materiales_suma] + cotizaciones.mapped('codigo')))
-        materiales_existentes = Material.search([('codigo', 'in', todos_codigos)])
-        materiales_dict = {m.codigo: m for m in materiales_existentes}
+                }
+                get_material = self.env['dtm.compras.material'].search(
+                    [('codigo', '=', codigo), ('nombre', '=', get_requi.nombre)], limit=1)
+                get_material.write(vals) if get_material else get_material.create(vals)
 
-        # 4️⃣ Actualizar o crear materiales no Cotización
-        for m in materiales_suma:
-            codigo = m['codigo']
-            nombre = Requerido.search([('codigo', '=', codigo)], limit=1).nombre
-            vals = {
-                'codigo': codigo,
-                'cantidad': m['cantidad'],
-                'nombre': nombre
-            }
-            if codigo in materiales_dict:
-                materiales_dict[codigo].write(vals)
-            else:
-                Material.create(vals)
 
-        # 5️⃣ Actualizar o crear Cotizaciones
-        for cot in cotizaciones:
-            codigo = cot.codigo
-            vals = {
-                'codigo': codigo,
-                'nombre': cot.nombre,
-                'cantidad': 1,
-                'observacion': 'Cotizar',
-                'fecha_recepcion': datetime.datetime.today(),
-                'orden_compra': 'Cotizar'
-            }
-            if codigo in materiales_dict:
-                materiales_dict[codigo].write(vals)
-            else:
-                Material.create(vals)
 
-        # 6️⃣ Limpiar materiales que ya no existen en Requerido
-        codigos_requerido = set(Requerido.mapped('codigo'))
-        codigos_material = set(Material.mapped('codigo'))
-        codigos_borrar = list(codigos_material - codigos_requerido)
-        if codigos_borrar:
-            Material.search([('codigo', 'in', codigos_borrar)]).unlink()
 
-        # 7️⃣ Limpiar registros con cantidad cero
-        cero_materiales = Material.search([('cantidad', '=', 0)])
-        if cero_materiales:
-            cero_materiales.unlink()
+
+
+
+
+
+        # for item in material:
+
+
+
 
         return res
 

@@ -26,17 +26,19 @@
             </field>
         </record>
 
-<!--        <record id="dtm_compras_material_search_view" model="ir.ui.view">-->
-<!--            <field name="name">dtm.compras.material.search</field>-->
-<!--            <field name="model">dtm.compras.material</field>-->
-<!--            <field name="arch" type="xml">-->
-<!--                <search string="ModelTitle">-->
-<!--                    <group expand="1" string="Group By">-->
-<!--                        <filter string="Example Field" name="example_field" domain="[]" context="{'group_by':'example_field'}"/>-->
-<!--                    </group>-->
-<!--               </search>-->
-<!--            </field>-->
-<!--        </record>-->
+        <record id="dtm_compras_material_search_view" model="ir.ui.view">
+            <field name="name">dtm.compras.material.search</field>
+            <field name="model">dtm.compras.material</field>
+            <field name="arch" type="xml">
+                <search string="ModelTitle">
+                    <group expand="1" string="Group By">
+                        <field name="codigo"/>
+                        <field name="nombre"/>
+                        <field name="proveedor_id"/>
+                    </group>
+               </search>
+            </field>
+        </record>
 
         <record id="dtm_compras_material_act_window" model="ir.actions.act_window">
             <field name="name">Requerido</field>
