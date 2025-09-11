@@ -98,6 +98,8 @@ class Proveedor(models.Model):
 class SoloMaterial(models.Model):
     _name = "dtm.compras.material"
     _description = "Modelo para llevar acabo la suma de los materiales repetidos de diferentes ordenes"
+    _inherit = ['mail.thread','mail.activity.mixin']
+
 
     proveedor_id = fields.Many2one("dtm.compras.proveedor", string="Proveedor")
     codigo = fields.Integer(string="Codigo", readonly=True)
@@ -107,7 +109,7 @@ class SoloMaterial(models.Model):
     costo = fields.Float(string="Total", compute="_compute_costo", store=True)
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada")
-    observacion = fields.Char(string="Observaciones")
+    observacion = fields.Char(string="Observaciones", tracking=True)
     aprobacion = fields.Boolean(string="Aprovado")
     permiso = fields.Boolean(compute="_compute_permiso")
     servicio = fields.Boolean(string="Servicio", readonly=True)
@@ -115,6 +117,25 @@ class SoloMaterial(models.Model):
     mayoreo = fields.Float(string='Mayoreo')
     user = fields.Char()
 
+    #----------------------Tracking----------------------------------
+    unitario_tracking = fields.Char(compute='_compute_unitario_tracking',tracking=True,store=True)
+    mostrador_tracking = fields.Char(compute='_compute_mostrador_tracking',tracking=True,store=True)
+    mayoreo_tracking = fields.Char(compute='_compute_mayoreo_tracking',tracking=True,store=True)
+
+    @api.depends('unitario')
+    def _compute_unitario_tracking(self):
+        for record in self:
+            record.unitario_tracking = str(record.unitario)
+
+    @api.depends('mostrador')
+    def _compute_mostrador_tracking(self):
+        for record in self:
+            record.mostrador_tracking = str(record.mostrador)
+
+    @api.depends('mayoreo')
+    def _compute_mayoreo_tracking(self):
+        for record in self:
+            record.mayoreo_tracking = str(record.mayoreo)
 
     def _compute_permiso(self):
         # Lógica para dar permisos de compra
@@ -131,6 +152,23 @@ class SoloMaterial(models.Model):
             result.costo = result.cantidad * result.unitario
 
     def action_wizard(self):
+        # print(self.nombre,self.proveedor_id.nombre)
+        self.env['dtm.compras.conceptos'].search([]).unlink()
+        self.env.cr.execute(f"SELECT setval('dtm_compras_conceptos_id_seq', 1, false);")
+        get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', self.codigo)])
+        for result in get_material:
+            get_orden = self.env['dtm.odt'].search([('ot_number', '=', result.orden_trabajo)], limit=1)
+            vals = {
+                    'orden_trabajo':result.orden_trabajo,
+                    'nombre':get_orden.product_name,
+                    'cliente':get_orden.name_client,
+                    'disenador':result.disenador,
+                    'cantidad':result.cantidad,
+                    'nesteo':False if result.nesteo else True,
+            }
+            self.env['dtm.compras.conceptos'].create(vals)
+
+
         return{
             'name': 'Confirmar Compra',
             'type': 'ir.actions.act_window',
@@ -160,47 +198,51 @@ class SoloMaterial(models.Model):
 
             get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',self.codigo)])
             for material in get_requerido:
-                vals = {
-                    'orden_trabajo':material.orden_trabajo,
-                    'tipo_orden':material.tipo_orden,
-                    'revision_ot':material.revision_ot,
-                    'solicitado':material.create_date,
-                    'proveedor':self.proveedor_id.nombre,
-                    'codigo':self.codigo,
-                    'nombre':self.nombre,
-                    'cantidad':material.cantidad,
-                    'unitario':self.unitario,
-                    'costo':self.costo,
-                    'orden_compra':self.orden_compra if self.orden_compra else 'N/A',
-                    'fecha_compra':datetime.datetime.today(),
-                    'mostrador':self.mostrador,
-                    'mayoreo':self.mayoreo,
-                    'autoriza':self.user,
 
-                }
-                # Pasa la información a realizados
-                self.env['dtm.compras.realizado'].create(vals)
+                if int(material.orden_trabajo) in self.env['dtm.compras.conceptos'].search([]).mapped('orden_trabajo'):
+                    vals = {
+                        'orden_trabajo':material.orden_trabajo,
+                        'tipo_orden':material.tipo_orden,
+                        'revision_ot':material.revision_ot,
+                        'solicitado':material.create_date,
+                        'proveedor':self.proveedor_id.nombre,
+                        'codigo':self.codigo,
+                        'nombre':self.nombre,
+                        'cantidad':material.cantidad,
+                        'unitario':self.unitario,
+                        'costo':self.costo,
+                        'orden_compra':self.orden_compra if self.orden_compra else 'N/A',
+                        'fecha_compra':datetime.datetime.today(),
+                        'mostrador':self.mostrador,
+                        'mayoreo':self.mayoreo,
+                        'autoriza':self.user,
 
-                vals = {
-                    "codigo": self.codigo,
-                    "orden_trabajo": material.orden_trabajo,
-                    "revision_ot": material.revision_ot,
-                    "proveedor": self.proveedor_id.nombre,
-                    "descripcion": self.nombre,
-                    "cantidad": material.cantidad,
-                    "fecha_recepcion": self.fecha_recepcion,
-                }
-                # Se manda la información a en transito para la espera del material
-                self.env['dtm.control.entradas'].search([]).create(vals)
-                # Si es una requisición pondrá el status de comprado
-                model_id = self.env['dtm.requisicion'].search([('folio', '=', int(material.orden_trabajo))])
-                req_material = self.env['dtm.requisicion.material'].search(
-                    [('model_id', '=', model_id.id), ('codigo', '=', self.codigo)])
-                req_material.write({'comprado': True}) if req_material else None
-                # Se borra el material de requerido
-                material.unlink()
-            # Se quita la fila de este modelo
-            self.unlink()
+                    }
+                    # Pasa la información a realizados
+                    self.env['dtm.compras.realizado'].create(vals)
+
+                    vals = {
+                        "codigo": self.codigo,
+                        "orden_trabajo": material.orden_trabajo,
+                        "revision_ot": material.revision_ot,
+                        "proveedor": self.proveedor_id.nombre,
+                        "descripcion": self.nombre,
+                        "cantidad": material.cantidad,
+                        "fecha_recepcion": self.fecha_recepcion,
+                    }
+                    # Se manda la información a en transito para la espera del material
+                    self.env['dtm.control.entradas'].search([]).create(vals)
+                    # Si es una requisición pondrá el status de comprado
+                    model_id = self.env['dtm.requisicion'].search([('folio', '=', int(material.orden_trabajo))])
+                    req_material = self.env['dtm.requisicion.material'].search(
+                        [('model_id', '=', model_id.id), ('codigo', '=', self.codigo)])
+                    req_material.write({'comprado': True}) if req_material else None
+                    # Se borra el material de requerido
+                    material.unlink()
+                # Se quita la fila de este modelo
+                # self.unlink()
+                self.get_view()
+
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(SoloMaterial, self).get_view(view_id, view_type, **options)
@@ -246,18 +288,6 @@ class SoloMaterial(models.Model):
                 get_material.write(vals) if get_material else get_material.create(vals)
 
 
-
-
-
-
-
-
-
-        # for item in material:
-
-
-
-
         return res
 
 
@@ -272,6 +302,8 @@ class CompraConfirmacionWizard(models.TransientModel):
         required=True
     )
 
+    conceptos_id = fields.Many2many('dtm.compras.conceptos')
+
     costo = fields.Float(string='Consto', readonly=True)
     total = fields.Float(string='Total', readonly=True)
     material = fields.Char(string='Material', readonly=True)
@@ -280,10 +312,26 @@ class CompraConfirmacionWizard(models.TransientModel):
     cantidad = fields.Text(string='cantidad', readonly=True)
     proveedor = fields.Text(string='Proveedor', readonly=True)
 
+    @api.onchange('conceptos_id')
+    def onchange_conceptos_id(self):
+        # Todos los conceptos que hay en la BD
+        all_conceptos = self.env['dtm.compras.conceptos'].search([])
+        # Los IDs que siguen presentes en el wizard
+        current_ids = self.conceptos_id.ids
+
+        for concepto in all_conceptos:
+            if concepto.id not in current_ids:
+                concepto.unlink()  #  elimina de la tabla y de la relación
+        nuevo_precio = self.env['dtm.compras.conceptos'].search([('id','in',current_ids)])
+        suma_cantidad = sum(nuevo_precio.mapped('cantidad'))
+        self.costo = suma_cantidad * self.total
+        self.cantidad = suma_cantidad
+
     def action_confirmar_compra(self):
         if self.compra_id:
             self.compra_id.action_done()
         return {'type': 'ir.actions.act_window_close'}
+
 
     @api.model
     def default_get(self, fields_list):
@@ -298,14 +346,17 @@ class CompraConfirmacionWizard(models.TransientModel):
             res['material'] = get_codigo.nombre
             res['cantidad'] = get_codigo.cantidad
             res['proveedor'] = get_codigo.proveedor_id.nombre
-
-            # Si quieres recorrer las órdenes
-            get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', get_codigo.codigo)])
-            ordenes = ''
-            for result in get_material:
-                get_orden = self.env['dtm.odt'].search([('ot_number','=',result.orden_trabajo)],limit=1)
-                ordenes += f'{result.orden_trabajo} - {get_orden.product_name} - {get_orden.name_client} - {result.disenador} - {result.cantidad} {"Falta Nesteo" if not result.nesteo else ""}\n'
-
-            res['ordenes'] = ordenes
+            res['conceptos_id'] = [(6,0,self.env['dtm.compras.conceptos'].search([]).ids)]
 
         return res
+
+class Conceptos(models.Model):
+    _name = "dtm.compras.conceptos"
+    _description = "Tabla para archivar los conceptos a comprar"
+
+    orden_trabajo = fields.Integer(string='Orden')
+    nombre = fields.Char(string='Nombre')
+    cliente = fields.Char(string='Cliente')
+    disenador = fields.Char(string='Diseñador')
+    cantidad = fields.Integer(string='Cantidad')
+    nesteo = fields.Boolean(string='Nesteo')
