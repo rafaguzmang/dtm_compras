@@ -17,6 +17,16 @@
                     <div class="col-9">
 
                         <field name="ordenes" readonly="1"/>
+                        <field name="conceptos_id">
+                            <tree create="false">
+                                <field name="orden_trabajo"/>
+                                <field name="nombre"/>
+                                <field name="cliente"/>
+                                <field name="disenador"/>
+                                <field name="cantidad"/>
+                                <field name="nesteo"/>
+                            </tree>
+                        </field>
                     </div>
                     <div class="col-3 ">
                         <h1>

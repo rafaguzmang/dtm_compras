@@ -8,7 +8,8 @@ from datetime import datetime
 
 
 class ComprasWebSiteDirections(http.Controller):
-    @http.route('/dtm_compras/get_data', type='json', auth='public', csrf=False)
+    # @http.route('/dtm_compras/get_data', type='json', auth='none', save_session=False, csrf=False,cors="*")
+    @http.route('/dtm_compras/get_data', type='json', auth='none', save_session=False, csrf=False, cors="*")
     def get_compras(self, **kw):
         list_ordenes = []
         cont = 0
@@ -327,3 +328,39 @@ class Materiales(http.Controller):
         #         'Access-Control-Allow-Origin': '*',
         #     }
         # )
+
+
+class SimpleJsonController(http.Controller):
+
+    @http.route('/api/simple_data', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False)
+    def get_simple_data(self, **kw):
+        # ✅ HEADERS CORS MANUALES (por si la configuración no funciona)
+        headers = [
+            ('Content-Type', 'application/json'),
+            ('Access-Control-Allow-Origin', '*'),
+            ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE'),
+            ('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept'),
+            ('Access-Control-Allow-Credentials', 'true')
+        ]
+
+        # ✅ Manejar preflight OPTIONS
+        if request.httprequest.method == 'OPTIONS':
+            return request.make_response('', headers)
+
+        # ✅ Tu datos
+        simple_data = {
+            "empresa": "DTM Industry",
+            "fecha": "2024-01-15",
+            "ordenes": [
+                {"id": 1, "cliente": "Cliente A", "producto": "Lámina acero", "cantidad": 150, "estado": "pendiente"},
+                {"id": 2, "cliente": "Cliente B", "producto": "Tubo cuadrado", "cantidad": 75, "estado": "completado"},
+                {"id": 3, "cliente": "Cliente C", "producto": "Perfil angular", "cantidad": 200, "estado": "en_proceso"}
+            ],
+            "total_ordenes": 3,
+            "status": "success"
+        }
+
+        return request.make_response(
+            json.dumps(simple_data),
+            headers=headers
+        )
