@@ -32,6 +32,8 @@ export class Seguimiento extends Component {
                 });
 
                 const data = await response.json();
+                this.state.datos = data.result || {};   // 👈 aseguras objeto vacío
+
 //                console.log(data.result);
                 this.state.datos = data.result;
 
@@ -57,6 +59,8 @@ export class Seguimiento extends Component {
                     body:JSON.stringify({})
                 });
                 const transito = await transito_data.json();
+                this.state.transitoList = transito.result || {};   // 👈 aseguras objeto vacío
+
 //                console.log(transito.result);
                 this.state.transitoList = transito.result;
 //                console.log(this.state.transitoList);

@@ -32,10 +32,11 @@ class ComprasWebSiteDirections(http.Controller):
             # datos_requi and print(datos_requi)
             # Se obtiene la P.O. del modulo de ventas
             po_pdf = request.env['dtm.compras.items'].sudo().search([('orden_trabajo','=',orden.orden_trabajo)],limit=1).model_id.archivos_id
-            # print(datos_orden.materials_ids)
+
             # si es orden de servicio
             if datos_orden:
                 for row in datos_orden.materials_ids:
+                    print(row)
                     # datos de requerido
                     en_compra = request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',orden.orden_trabajo),('revision_ot','=',orden.revision_ot),('codigo','=',row.materials_list.id)])
                     # datos de materiales (requerido nuevo)
@@ -68,13 +69,13 @@ class ComprasWebSiteDirections(http.Controller):
                         'product_name': datos_orden.product_name if datos_orden else None,
                         'po_pdf_url': f'/web/content/{po_pdf.id}?mimetype=application/pdf&download=false' if po_pdf else None,
                         'status':   'Entregado' if row.entregado else
-                                    'Comprado' if request.env['dtm.compras.realizado'].search(
+                                    'Comprado' if request.env['dtm.compras.realizado'].sudo().search(
                                         [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
                                          ('codigo', '=', row.materials_list.id)], limit=1).comprado else
-                                    'En cámino' if request.env['dtm.compras.realizado'].search(
+                                    'En cámino' if request.env['dtm.compras.realizado'].sudo().search(
                                         [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
                                          ('codigo', '=', row.materials_list.id)], limit=1) else
-                                    'Requerido' if request.env['dtm.compras.requerido'].search(
+                                    'Requerido' if request.env['dtm.compras.requerido'].sudo().search(
                                         [('orden_trabajo', '=', orden.orden_trabajo), ('revision_ot', '=', orden.revision_ot),
                                          ('codigo', '=', row.materials_list.id)], limit=1) else
                                     'En Almacén' if row.materials_required == 0 and row.materials_cuantity > 0 else
@@ -121,7 +122,7 @@ class ComprasWebSiteDirections(http.Controller):
                     })
                     cont += 1
 
-            # print(list_ordenes)
+            print(list_ordenes)
 
         # Agrupar por cliente y orden_trabajo
         agrupado = defaultdict(lambda: defaultdict(list))
