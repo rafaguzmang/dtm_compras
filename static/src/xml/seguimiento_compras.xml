@@ -155,7 +155,7 @@
                         <td><t t-esc="material.nombre" /></td>
                         <td><t t-esc="material.cantidad" /></td>
                         <td><t t-esc="material.costo.toFixed(2)" /></td>
-                        <t t-esc="(new Date(material.en_compras)).toISOString().split('T')[0]" />
+                        <td><t t-esc="material.en_compras ? (new Date(material.en_compras)).toISOString().split('T')[0] : ''" /></td>
                         <td><t t-esc="material.observacion" /></td>
                       </tr>
                     </t>
