@@ -155,7 +155,7 @@ class SoloMaterial(models.Model):
         # print(self.nombre,self.proveedor_id.nombre)
         self.env['dtm.compras.conceptos'].search([]).unlink()
         self.env.cr.execute(f"SELECT setval('dtm_compras_conceptos_id_seq', 1, false);")
-        get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', self.codigo)])
+        get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', self.codigo),('nombre','=',self.nombre)])
         for result in get_material:
             get_orden = self.env['dtm.odt'].search([('ot_number', '=', result.orden_trabajo)], limit=1)
             vals = {
@@ -164,7 +164,7 @@ class SoloMaterial(models.Model):
                     'cliente':get_orden.name_client,
                     'disenador':result.disenador,
                     'cantidad':result.cantidad,
-                    'nesteo':False if result.nesteo else True,
+                    'nesteo':True if result.nesteo else False,
             }
             self.env['dtm.compras.conceptos'].create(vals)
 
@@ -268,6 +268,7 @@ class SoloMaterial(models.Model):
             get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=','Requi')],limit=1)
             get_requi = self.env['dtm.compras.requerido'].search([('codigo', '=', codigo), ('tipo_orden', '=', 'Requi')], limit=1)
             if get_requerido:
+                codigo == 2157 and print(get_requerido)
                 vals = {
                     'codigo': codigo,
                     'nombre': get_requerido.nombre,
@@ -276,12 +277,11 @@ class SoloMaterial(models.Model):
                 }
                 get_material = self.env['dtm.compras.material'].search([('codigo','=',codigo),('nombre','=',get_requerido.nombre)],limit=1)
                 get_material.write(vals) if get_material else get_material.create(vals)
-            elif get_requi:
+            if get_requi:
                 vals = {
                     'codigo': codigo,
                     'nombre': get_requi.nombre,
                     'cantidad': get_requi.cantidad,
-
                 }
                 get_material = self.env['dtm.compras.material'].search(
                     [('codigo', '=', codigo), ('nombre', '=', get_requi.nombre)], limit=1)
@@ -289,7 +289,6 @@ class SoloMaterial(models.Model):
 
 
         return res
-
 
 class CompraConfirmacionWizard(models.TransientModel):
     _name = "dtm.compras.confirm.wizard"
