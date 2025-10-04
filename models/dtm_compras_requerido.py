@@ -53,41 +53,6 @@ class Realizado(models.Model):
     mayoreo = fields.Float(string='Mayoreo', readonly=True)
     autoriza = fields.Char(string='Autorizó',readonly=True)
 
-    def get_view(self, view_id=None, view_type='form', **options):
-        res = super(Realizado, self).get_view(view_id, view_type, **options)
-
-        get_this = self.env['dtm.compras.realizado'].search([])
-        for row in get_this:
-            row.cantidad > 0 and row.write({'unitario':row.costo/row.cantidad})
-
-        # Carga el último precio cotizado al modelo dtm.compras.precios
-        get_realizado = list(set(self.env['dtm.compras.realizado'].search([]).mapped('codigo')))
-        for codigo in get_realizado:
-            record = self.env['dtm.compras.realizado'].search([('codigo', '=', codigo)], limit=1, order='id desc')
-            if codigo in self.env['dtm.compras.precios'].search([]).mapped('codigo'):
-                if self.env['dtm.compras.realizado'].search([('codigo','=',codigo)], limit=1, order='id desc').tipo_orden not in ['OT','NPI']:
-                    self.env['dtm.compras.precios'].search([('codigo', '=', record.codigo)]).write(
-                        {'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
-            else:
-                self.env['dtm.compras.precios'].create(
-                    {'codigo': record.codigo, 'nombre': record.nombre, 'precio': record.unitario,'mayoreo':record.mayoreo})
-
-        get_comprado = self.env['dtm.compras.realizado'].search([('comprado', '!=', 'Recibido')])
-        for item in get_comprado:
-            if not self.env['dtm.control.entradas'].search([('codigo','=',str(item.codigo)),('orden_trabajo','=',item.orden_trabajo)]):
-                self.env['dtm.control.entradas'].create({
-                        "proveedor": item.proveedor,
-                        "codigo": item.codigo,
-                        "descripcion": item.nombre,
-                        "cantidad": item.cantidad,
-                        "fecha_recepcion": item.fecha_recepcion,
-                        "orden_trabajo": item.orden_trabajo,
-                        "revision_ot": item.revision_ot
-                })
-
-        return res
-
-
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
     _description = "Lista de provedores"
@@ -164,7 +129,7 @@ class SoloMaterial(models.Model):
                     'cliente':get_orden.name_client,
                     'disenador':result.disenador,
                     'cantidad':result.cantidad,
-                    'nesteo':False if result.nesteo else True,
+                    'nesteo':True if result.nesteo else False,
             }
             self.env['dtm.compras.conceptos'].create(vals)
 
@@ -191,10 +156,21 @@ class SoloMaterial(models.Model):
 
         elif self.permiso:
             # Se manda el precio mostrador y mayoreo a la tabla de materiales
-            get_material = self.env['dtm.materiales'].search([('id','=',self.codigo)])
-            if get_material:
-                # print(get_material)
+            get_material = self.env['dtm.materiales'].search([('id','=',self.codigo)],limit=1)
+            if get_material.nombre and get_material.nombre in self.nombre:
                 get_material.write({'mostrador':self.mostrador,'mayoreo':self.mayoreo})
+                get_precios = self.env['dtm.compras.precios'].search([('codigo','=',self.codigo)])
+                vals = {
+                    'codigo':get_material.id,
+                    'tipo_material':'Indirecto',
+                    'nombre':self.nombre,
+                    'precio':self.mostrador,
+                    'mayoreo':self.mayoreo,
+                }
+                if get_precios.nombre and get_material.nombre in get_precios.nombre:
+                    get_precios.write(vals)
+                else:
+                    get_precios.create(vals)
 
             get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',self.codigo)])
             for material in get_requerido:
@@ -289,7 +265,6 @@ class SoloMaterial(models.Model):
 
 
         return res
-
 
 class CompraConfirmacionWizard(models.TransientModel):
     _name = "dtm.compras.confirm.wizard"
