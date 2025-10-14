@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id = "dtm_compras_realizado_accion" model="ir.actions.act_window">
-            <field name="name">Comprado</field>
+            <field name="name">Compras</field>
             <field name="res_model">dtm.compras.realizado</field>
             <field name="view_mode">tree</field>
         </record>

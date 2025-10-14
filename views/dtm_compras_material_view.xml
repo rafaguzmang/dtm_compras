@@ -6,7 +6,7 @@
             <field name="name">dtm.compras.material.tree</field>
             <field name="model">dtm.compras.material</field>
             <field name="arch" type="xml">
-                <tree editable="bottom" delete="true">
+                <tree editable="bottom" delete="false" create="false" decoration-danger="retrazo">
                     <field name="proveedor_id" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
@@ -19,6 +19,7 @@
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <field name="observacion"/>
+                    <field name="retrazo" invisible="1"/>
                     <button name="action_wizard" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
                             attrs="{'invisible': ['|','|','|','|',('costo','=',0),('proveedor_id','=',False),('mostrador','=',0),('mayoreo','=',0),('fecha_recepcion','=',False)]}"/>
 <!--                    <field name="listo" invisible="1"/>-->
@@ -41,7 +42,7 @@
         </record>
 
         <record id="dtm_compras_material_act_window" model="ir.actions.act_window">
-            <field name="name">Requerido</field>
+            <field name="name">Cotizaciones</field>
             <field name="res_model">dtm.compras.material</field>
             <field name="view_mode">tree</field>
         </record>

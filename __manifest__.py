@@ -27,7 +27,8 @@
             'dtm_compras/static/src/js/seguimiento_compras.js',
             'dtm_compras/static/src/xml/seguimiento_compras.xml',
             'dtm_compras/static/src/js/dialog_materiales.js',
-            'dtm_compras/static/src/xml/dialog_material_template.xml'
+            'dtm_compras/static/src/xml/dialog_material_template.xml',
+            'dtm_compras/static/src/js/confirmacion.js'
         ],
     },
     'license': 'LGPL-3',
