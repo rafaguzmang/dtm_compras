@@ -28,7 +28,4 @@ class Precios(models.Model):
             if get_inv.nombre and get_inv.nombre in item.nombre:
                 item.write({'nombre': f"{get_inv.nombre} {get_inv.medida}" ,'tipo_material':'Directo'})
 
-
-
-
         return res

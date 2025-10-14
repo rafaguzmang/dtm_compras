@@ -18,13 +18,17 @@
 
                         <field name="ordenes" readonly="1"/>
                         <field name="conceptos_id">
-                            <tree create="false">
+                            <tree create="false" readonly="1">
                                 <field name="orden_trabajo"/>
                                 <field name="nombre"/>
                                 <field name="cliente"/>
                                 <field name="disenador"/>
                                 <field name="cantidad"/>
                                 <field name="nesteo"/>
+                                <field name="permiso" invisible="1"/>
+                                <button name="action_rechazar" type="object" string=""  class="btn btn-primary" icon="fa-thumbs-o-down"
+                                attrs="{'invisible':[('permiso','=',False)]}"/>
+
                             </tree>
                         </field>
                     </div>
@@ -43,12 +47,47 @@
                         </div>
                     </div>
                 </div>
-
+                 <field name="permiso" invisible="1"/>
                 <footer>
-                    <button string="Confirmar" type="object" name="action_confirmar_compra" class="btn-primary"/>
+                    <button string="Confirmar" type="object" name="action_confirmar_compra" class="btn-primary" attrs="{'invisible':[('permiso','=',False)]}"/>
                     <button string="Cancelar" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
+
+    <record id="view_dtm_compras_rechazo_wizard" model="ir.ui.view">
+        <field name="name">dtm.compras.rechazo.wizard.form</field>
+        <field name="model">dtm.compras.rechazo.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirmar Borrado">
+                <div class="o_form_sheet">
+                  <h5>El siguiente material será borrado:</h5>
+                    <p>
+                        <strong>Código:</strong> <field name="codigo"/>
+                    </p>
+                    <p>
+                        <strong>Material:</strong> <field name="material"/>
+                    </p>
+                    <p>
+                        <strong>Orden de trabajo:</strong> <field name="orden_trabajo"/>
+                    </p>
+                    <p>
+                        <strong>Cliente:</strong> <field name="cliente"/>
+                    </p>
+                    <p>
+                        <strong>Nombre:</strong> <field name="nombre"/>
+                    </p>
+                    <p>
+                        <strong>Diseñador:</strong> <field name="disenador"/>
+                    </p>
+                </div>
+                <footer>
+                  <button name="action_confirmar" type="object" string="Confirmar" class="btn-danger"/>
+                  <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
 </odoo>
