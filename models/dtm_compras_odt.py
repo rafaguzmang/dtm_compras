@@ -8,7 +8,6 @@ class ComprasOdt(models.Model):
     _description = "Visualización de la orden de trabajo"
     _order = "ot_number desc"
 
-
     status = fields.Char(readonly=True)
     ot_number = fields.Integer(string="NÚMERO",readonly=True)
     tipe_order = fields.Char(string="TIPO",readonly=True)
