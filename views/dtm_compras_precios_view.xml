@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id = "dtm_compras_precios_accion" model="ir.actions.act_window">
+            <field name="name">Tabla de Precios</field>
+            <field name="res_model">dtm.compras.precios</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id = "dtm_compras_precios_search" model="ir.ui.view">
+            <field name="name">dtm_compras_precios_search</field>
+            <field name="model">dtm.compras.precios</field>
+            <field name ="arch" type="xml">
+               <search>
+                    <field name="codigo"/>
+                    <field name="nombre"/>
+                    <separator/>
+                    <filter string="Directo" name="directo" domain="[('tipo_material','=','Directo')]"/>
+                    <filter string="Indirecto" name="indirecto" domain="[('tipo_material','=','Indirecto')]"/>
+
+               </search>
+            </field>
+        </record>
+
+        <record id="dtm_compras_precios_tree" model="ir.ui.view">
+            <field name="name">dtm_compras_precios_tree</field>
+            <field name="model">dtm.compras.precios</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="codigo"/>
+                    <field name="tipo_material"/>
+                    <field name="nombre"/>
+                    <field name="precio"/>
+                    <field name="mayoreo"/>
+                </tree>
+            </field>
+        </record>
+
+<!--         <menuitem id="dtm_compras_precios_menu" action="dtm_compras_precios_accion" />-->
+    </data>
+</odoo>

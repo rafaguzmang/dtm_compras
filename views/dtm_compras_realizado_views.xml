@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id = "dtm_compras_realizado_accion" model="ir.actions.act_window">
-            <field name="name">Realizado</field>
+            <field name="name">Compras</field>
             <field name="res_model">dtm.compras.realizado</field>
             <field name="view_mode">tree</field>
         </record>
@@ -18,8 +18,11 @@
                     <field name="nombre"/>
                     <field name="orden_compra"/>
                     <separator/>
-                    <filter string="Comprado" name="comprado" domain="[('comprado','!=',False)]"/>
-                    <filter string="No Comprado" name="no-comprado" domain="[('comprado','=',False)]"/>
+                    <filter string="Recibido" name="comprado" domain="[('comprado','!=',False)]"/>
+                    <filter string="No Recibido" name="no-comprado" domain="[('comprado','=',False)]"/>
+
+
+
 
                </search>
             </field>
@@ -29,20 +32,26 @@
             <field name="name">dtm_compras_realizado_tree</field>
             <field name="model">dtm.compras.realizado</field>
             <field name="arch" type="xml">
-                <tree decoration-success="comprado=='comprado'"
-                        decoration-warning="comprado!='comprado'"
-                        decoration-danger="comprado=='comprado' and cantidad &gt; cantidad_almacen">
+                <tree delete="true" decoration-success="comprado=='Recibido'"
+                        decoration-warning="comprado!='Recibido'"
+                        decoration-danger="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
                     <field name="orden_trabajo"/>
+                    <field name="revision_ot"/>
+                    <field name="solicitado"/>
                     <field name="proveedor" options="{'no_open':True}"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
                     <field name="cantidad_almacen"/>
+                    <field name="mostrador"/>
+                    <field name="mayoreo"/>
+                    <field name="unitario"/>
                     <field name="costo"/>
                     <field name="orden_compra"/>
                     <field name="fecha_recepcion"/>
                     <field name="fecha_compra"/>
                     <field name="comprado"/>
+                    <field name="autoriza"/>
                 </tree>
             </field>
         </record>
