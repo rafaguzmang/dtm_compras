@@ -51,6 +51,13 @@ class Realizado(models.Model):
     mostrador = fields.Float(string='Mostrador', readonly=True)
     mayoreo = fields.Float(string='Mayoreo', readonly=True)
     autoriza = fields.Char(string='Autorizó',readonly=True)
+    listo_btn = fields.Boolean()
+
+
+
+
+
+
 
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
