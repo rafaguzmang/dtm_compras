@@ -22,7 +22,8 @@
                     <filter string="Comprado" name="comprado" domain="[('listo_btn','=',True)]"/>
                     <filter string="Para Comprar" name="no-comprado" domain="[('listo_btn','=',False),('comprado','=',False)]"/>
                     <filter string="Recibido" name="recibido" domain="[('comprado','!=',False)]"/>
-                    <filter string="No Recibido" name="no-recibido" domain="[('comprado','=',False)]"/>
+                    <filter string="No Recibido" name="no-recibido" domain="[('listo_btn','=',True),('comprado','=',False)]"/>
+                    <filter string="No Recibido old" name="no-recibido" domain="[('comprado','=',False)]"/>
 
 
 
@@ -34,9 +35,10 @@
             <field name="name">dtm_compras_realizado_tree</field>
             <field name="model">dtm.compras.realizado</field>
             <field name="arch" type="xml">
-                <tree delete="true" decoration-success="comprado=='Recibido'"
-                        decoration-info="listo_btn"
-                        decoration-danger="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
+                <tree delete="true"
+                        decoration-info="listo_btn and comprado != 'Recibido'"
+                        decoration-success="comprado =='Recibido' and listo_btn"
+                        decoration-warning="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
                     <field name="listo_btn" widget="boolean_toggle"/>
                     <field name="orden_trabajo"/>
                     <field name="revision_ot"/>

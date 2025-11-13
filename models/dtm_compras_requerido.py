@@ -40,9 +40,9 @@ class Realizado(models.Model):
     codigo = fields.Integer(string="Código")
     nombre = fields.Char(string="Nombre")
     cantidad = fields.Integer(string="Cantidad")
+    cantidad_almacen = fields.Integer(string="C-Real")
     unitario = fields.Float(string="P.Unitario")
     costo = fields.Float(string="Total")
-    cantidad_almacen = fields.Integer(string="C-Real")
     orden_compra = fields.Char(string="Orden de Compra")
     fecha_compra = fields.Date(string="Fecha de compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
@@ -51,13 +51,10 @@ class Realizado(models.Model):
     mostrador = fields.Float(string='Mostrador', readonly=True)
     mayoreo = fields.Float(string='Mayoreo', readonly=True)
     autoriza = fields.Char(string='Autorizó',readonly=True)
+    factura = fields.Char(string='Factura')
+    notas = fields.Char(string='Notas')
+    notas_almacen = fields.Char(string = 'Notas')
     listo_btn = fields.Boolean()
-
-
-
-
-
-
 
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
@@ -78,7 +75,7 @@ class SoloMaterial(models.Model):
     cantidad = fields.Integer(string="Cantidad", readonly=True)
     unitario = fields.Float(string="P.Unitario")
     costo = fields.Float(string="Total", compute="_compute_costo", store=True)
-    orden_compra = fields.Char(string="Orden de Compra")
+    orden_compra = fields.Char(string="Orden de Compra",required=True)
     fecha_recepcion = fields.Date(string="Fecha de estimada")
     observacion = fields.Char(string="Observaciones", tracking=True)
     aprobacion = fields.Boolean(string="Aprovado")
@@ -203,13 +200,12 @@ class SoloMaterial(models.Model):
                         'nombre':self.nombre,
                         'cantidad':material.cantidad,
                         'unitario':self.unitario,
-                        'costo':self.costo,
+                        'costo':material.cantidad * self.unitario,
                         'orden_compra':self.orden_compra if self.orden_compra else 'N/A',
                         'fecha_compra':datetime.datetime.today(),
                         'mostrador':self.mostrador,
                         'mayoreo':self.mayoreo,
                         'autoriza':self.user,
-
                     }
                     # Pasa la información a realizados
                     self.env['dtm.compras.realizado'].create(vals)
