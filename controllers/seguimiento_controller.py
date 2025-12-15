@@ -18,7 +18,7 @@ class ComprasWebSiteDirections(http.Controller):
         ordenes_unicos = list(set(ordenes.mapped('orden_trabajo')))
         ordenes_filtradas = [request.env['dtm.compras.requerido'].sudo().search([('orden_trabajo','=',unico)],limit=1) for unico in ordenes_unicos ]
 
-        # Se busca el todo el material por orden de compra o por requisición
+        # Se busca todo el material por orden de compra o por requisición
         for orden in ordenes_filtradas:
             # Se obtienen los datos de la orden
             datos_orden = request.env['dtm.odt'].sudo().search([

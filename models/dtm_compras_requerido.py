@@ -56,6 +56,23 @@ class Realizado(models.Model):
     notas_almacen = fields.Char(string = 'Notas')
     listo_btn = fields.Boolean()
 
+    def get_view(self, view_id=None, view_type='form', **options):
+        res = super(Realizado, self).get_view(view_id, view_type, **options)
+
+        get_realizado = self.env['dtm.compras.realizado'].search([('comprado', 'not in', ['Recibido','Parcial'])])
+        for record in get_realizado:
+            get_entradas = self.env['dtm.control.entradas'].search([('orden_trabajo','=',record.orden_trabajo),('codigo','=',record.codigo),('descripcion','=',record.nombre),('cantidad','=',record.cantidad)],limit=1)
+            vals ={
+                'proveedor':record.proveedor,
+                'orden_trabajo':record.orden_trabajo,
+                'codigo':record.codigo,
+                'descripcion':record.nombre,
+                'cantidad':record.cantidad,
+            }
+            get_entradas.write(vals) if get_entradas else get_entradas.create(vals)
+
+        return res
+
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
     _description = "Lista de provedores"
@@ -89,7 +106,6 @@ class SoloMaterial(models.Model):
     unitario_tracking = fields.Char(compute='_compute_unitario_tracking',tracking=True,store=True)
     mostrador_tracking = fields.Char(compute='_compute_mostrador_tracking',tracking=True,store=True)
     mayoreo_tracking = fields.Char(compute='_compute_mayoreo_tracking',tracking=True,store=True)
-
     retrazo = fields.Boolean(compute='_compute_retrazo')
 
     def _compute_retrazo(self):
