@@ -19,6 +19,18 @@ class Compras(models.Model):
     disenador = fields.Char(string="Solicita", readonly=True)
     nesteo = fields.Boolean()
 
+    def write(self,vals):
+
+        res = super(Compras,self).write(vals)
+
+        self.env["bus.bus"]._sendone(
+            'canal_compras',
+            'compras',
+            {'mensaje':'Actualizado por compras'}
+        )
+
+        return res
+
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Compras, self).get_view(view_id, view_type, **options)
 
@@ -55,6 +67,17 @@ class Realizado(models.Model):
     notas = fields.Char(string='Notas')
     notas_almacen = fields.Char(string = 'Notas')
     listo_btn = fields.Boolean()
+
+    def write(self, vals):
+        res = super(Realizado, self).write(vals)
+
+        self.env["bus.bus"]._sendone(
+            'canal_compras',
+            'compras',
+            {'mensaje': 'Actualizado por compras'}
+        )
+
+        return res
 
     def get_view(self, view_id=None, view_type='form', **options):
         res = super(Realizado, self).get_view(view_id, view_type, **options)
@@ -107,6 +130,15 @@ class SoloMaterial(models.Model):
     mostrador_tracking = fields.Char(compute='_compute_mostrador_tracking',tracking=True,store=True)
     mayoreo_tracking = fields.Char(compute='_compute_mayoreo_tracking',tracking=True,store=True)
     retrazo = fields.Boolean(compute='_compute_retrazo')
+
+    def write(self, vals):
+        res = super(SoloMaterial, self).write(vals)
+        self.env["bus.bus"]._sendone(
+            'canal_compras',
+            'compras',
+            {'mensaje': 'Actualizado por compras'}
+        )
+        return res
 
     def _compute_retrazo(self):
         for record in self:
