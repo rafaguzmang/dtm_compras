@@ -133,11 +133,7 @@ class SoloMaterial(models.Model):
 
     def write(self, vals):
         res = super(SoloMaterial, self).write(vals)
-        self.env["bus.bus"]._sendone(
-            'canal_compras',
-            'compras',
-            {'mensaje': 'Actualizado por compras'}
-        )
+
         return res
 
     def _compute_retrazo(self):
