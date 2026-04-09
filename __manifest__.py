@@ -6,9 +6,8 @@
     'depends': ['base', 'mail', 'dtm_procesos','web'],
     'data': [
         # Security
+        'security/res_groups.xml',
         'security/ir.model.access.csv',
-        # 'security/res_groups.xml',
-        # 'security/model_access.xml',
         # Views
         'views/dtm_compras_requerido_views.xml',
         'views/dtm_compras_realizado_views.xml',

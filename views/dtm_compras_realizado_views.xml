@@ -34,8 +34,9 @@
         <record id="dtm_compras_realizado_tree" model="ir.ui.view">
             <field name="name">dtm_compras_realizado_tree</field>
             <field name="model">dtm.compras.realizado</field>
+            <field name="priority">20</field>
             <field name="arch" type="xml">
-                <tree delete="true"
+                <tree 
                         decoration-info="listo_btn and comprado != 'Recibido'"
                         decoration-success="comprado =='Recibido' and listo_btn"
                         decoration-warning="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
@@ -59,8 +60,9 @@
                     <field name="autoriza"/>
                 </tree>
             </field>
+            <field name="groups_id" eval="[(4,ref('dtm_compras.group_compras_admin'))]"/>
         </record>
-
+       
 <!--         <menuitem id="dtm_compras_realizado_menu" action="dtm_compras_realizado_accion" />-->
     </data>
 </odoo>
