@@ -16,7 +16,7 @@
                     <field name="unitario"/>
                     <field name="costo"/>
                     <field name="permiso" invisible = "1"/>
-                    <field name="orden_compra"/>
+                    <!-- <field name="orden_compra"/> -->
                     <field name="fecha_recepcion"/>
                     <field name="observacion"/>
                     <field name="retrazo" invisible="1"/>

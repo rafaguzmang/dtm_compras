@@ -47,25 +47,25 @@ class Realizado(models.Model):
     orden_trabajo = fields.Char(string="Orden de Trabajo")
     tipo_orden = fields.Char(string="Tipo", readonly=True)
     revision_ot = fields.Integer(string="VER",default=1,readonly=True) # Esto es versión
-    solicitado = fields.Datetime(string='Solicitado')
+    solicitado = fields.Datetime(string='Solicitado', readonly=True)
     proveedor = fields.Char(string="Proveedor")
-    codigo = fields.Integer(string="Código")
-    nombre = fields.Char(string="Nombre")
-    cantidad = fields.Integer(string="Cantidad")
-    cantidad_almacen = fields.Integer(string="C-Real")
-    unitario = fields.Float(string="P.Unitario")
-    costo = fields.Float(string="Total")
-    orden_compra = fields.Char(string="Orden de Compra", required=False )
-    fecha_compra = fields.Date(string="Fecha de compra")
-    fecha_recepcion = fields.Date(string="Fecha de estimada de recepción")
-    comprado = fields.Char(string="Recibido")
+    codigo = fields.Integer(string="Código", readonly=True)
+    nombre = fields.Char(string="Nombre", readonly=True)
+    cantidad = fields.Integer(string="Cantidad", readonly=True)
+    cantidad_almacen = fields.Integer(string="C-Real", readonly=True)
+    unitario = fields.Float(string="P.Unitario", readonly=True)
+    costo = fields.Float(string="Total", readonly=True)
+    orden_compra = fields.Char(string="Orden de Compra" )
+    fecha_compra = fields.Date(string="Fecha de compra", readonly=True)
+    fecha_recepcion = fields.Date(string="Fecha de estimada de recepción", readonly=True)
+    comprado = fields.Char(string="Recibido", readonly=True)
     aprovacion = fields.Char(string="Aprovado", readonly=True)
     mostrador = fields.Float(string='Mostrador', readonly=True)
     mayoreo = fields.Float(string='Mayoreo', readonly=True)
     autoriza = fields.Char(string='Autorizó',readonly=True)
-    factura = fields.Char(string='Factura')
-    notas = fields.Char(string='Notas')
-    notas_almacen = fields.Char(string = 'Notas')
+    factura = fields.Char(string='Factura', readonly=True)
+    notas = fields.Char(string='Notas', readonly=True)
+    notas_almacen = fields.Char(string = 'Notas', readonly=True)
     listo_btn = fields.Boolean()
 
     def write(self, vals):
@@ -94,7 +94,28 @@ class Realizado(models.Model):
             }
             get_entradas.write(vals) if get_entradas else get_entradas.create(vals)
 
+        
+
+        get_self = self.env['dtm.compras.realizado'].search([('tipo_orden','in',['OT','NPI'])]).mapped('orden_trabajo')
+        get_ordenes = list(set([int(ot) for ot in get_self]))
+        for orden in get_ordenes:
+            get_diseno = self.env['dtm.odt'].search([('ot_number','=',orden)],limit=1)
+            if not get_diseno:                
+                get_self = self.env['dtm.compras.realizado'].search([('orden_trabajo','=',str(orden))])
+                get_self.unlink()
         return res
+
+    @api.onchange('listo_btn')
+    def _onchange_listo_btn(self):
+        if self.listo_btn and self.orden_compra == 'N/A':
+            self.listo_btn = False
+            return {
+                'warning': {
+                    'title': "Campo faltante",
+                    'message': "No puedes activar comprar si una orden."
+            }
+        }
+        
 
 class Proveedor(models.Model):
     _name = "dtm.compras.proveedor"
@@ -115,7 +136,7 @@ class SoloMaterial(models.Model):
     cantidad = fields.Integer(string="Cantidad", readonly=True)
     unitario = fields.Float(string="P.Unitario")
     costo = fields.Float(string="Total", compute="_compute_costo", store=True)
-    orden_compra = fields.Char(string="Orden de Compra",required=False)
+    orden_compra = fields.Char(string="Orden de Compra")
     fecha_recepcion = fields.Date(string="Fecha de estimada")
     observacion = fields.Char(string="Observaciones", tracking=True)
     aprobacion = fields.Boolean(string="Aprovado")

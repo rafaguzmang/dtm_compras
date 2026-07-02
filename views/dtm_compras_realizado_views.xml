@@ -36,7 +36,7 @@
             <field name="model">dtm.compras.realizado</field>
             <field name="priority">20</field>
             <field name="arch" type="xml">
-                <tree 
+                <tree editable="bottom"
                         decoration-info="listo_btn and comprado != 'Recibido'"
                         decoration-success="comprado =='Recibido' and listo_btn"
                         decoration-warning="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
@@ -44,7 +44,8 @@
                     <field name="orden_trabajo"/>
                     <field name="revision_ot"/>
                     <field name="solicitado"/>
-                    <field name="proveedor" options="{'no_open':True}"/>
+                    <!-- <field name="proveedor" options="{'no_open':True}"/> -->
+                    <field name="proveedor"/>
                     <field name="codigo" options="{'no_open':True}"/>
                     <field name="nombre"/>
                     <field name="cantidad"/>
