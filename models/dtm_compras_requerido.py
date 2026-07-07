@@ -319,25 +319,26 @@ class SoloMaterial(models.Model):
         for codigo in set_requerido:
             suma = sum(self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=','Requi')]).mapped('cantidad'))
             get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',codigo),('tipo_orden','!=','Requi')],limit=1)
-            get_requi = self.env['dtm.compras.requerido'].search([('codigo', '=', codigo), ('tipo_orden', '=', 'Requi')], limit=1)
+            get_requi_all = self.env['dtm.compras.requerido'].search([('codigo', '=', codigo), ('tipo_orden', '=', 'Requi')])
+            suma_requi = sum(get_requi_all.mapped('cantidad'))
+
             if get_requerido:
-                codigo == 2157 and print(get_requerido)
                 vals = {
                     'codigo': codigo,
                     'nombre': get_requerido.nombre,
                     'cantidad': suma,
-
                 }
                 get_material = self.env['dtm.compras.material'].search([('codigo','=',codigo),('nombre','=',get_requerido.nombre)],limit=1)
                 get_material.write(vals) if get_material else get_material.create(vals)
-            if get_requi:
+
+            if get_requi_all:
                 vals = {
                     'codigo': codigo,
-                    'nombre': get_requi.nombre,
-                    'cantidad': get_requi.cantidad,
+                    'nombre': get_requi_all[0].nombre,
+                    'cantidad': suma_requi,   # ahora sí es una suma
                 }
                 get_material = self.env['dtm.compras.material'].search(
-                    [('codigo', '=', codigo), ('nombre', '=', get_requi.nombre)], limit=1)
+                    [('codigo', '=', codigo), ('nombre', '=', get_requi_all[0].nombre)], limit=1)
                 get_material.write(vals) if get_material else get_material.create(vals)
         return res
 
