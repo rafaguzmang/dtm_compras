@@ -18,7 +18,7 @@
 
                         <field name="ordenes" readonly="1"/>
                         <field name="conceptos_id">
-                            <tree create="false" readonly="1">
+                            <tree create="false" readonly="1" decoration-warning="extra_materials==True">
                                 <field name="orden_trabajo"/>
                                 <field name="nombre"/>
                                 <field name="cliente"/>
@@ -26,8 +26,7 @@
                                 <field name="cantidad"/>
                                 <field name="nesteo"/>
                                 <field name="permiso" invisible="1"/>
-                                <button name="action_rechazar" type="object" string=""  class="btn btn-primary" icon="fa-thumbs-o-down"
-                                attrs="{'invisible':[('permiso','=',False)]}"/>
+                                <field name="extra_materials" invisible="1"/>                               
 
                             </tree>
                         </field>

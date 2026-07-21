@@ -39,7 +39,7 @@
                 <tree editable="bottom"
                         decoration-info="listo_btn and comprado != 'Recibido'"
                         decoration-success="comprado =='Recibido' and listo_btn"
-                        decoration-warning="comprado=='Recibido' and cantidad &gt; cantidad_almacen">
+                        decoration-warning="extra_materials==True and comprado != 'Recibido'">
                     <field name="listo_btn" widget="boolean_toggle"/>
                     <field name="orden_trabajo"/>
                     <field name="revision_ot"/>
@@ -59,6 +59,7 @@
                     <field name="fecha_compra"/>
                     <field name="comprado"/>
                     <field name="autoriza"/>
+                    <field name="extra_materials" invisible="1"/>
                 </tree>
             </field>
             <field name="groups_id" eval="[(4,ref('dtm_compras.group_compras_admin'))]"/>

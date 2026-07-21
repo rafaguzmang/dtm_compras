@@ -6,7 +6,7 @@ import re
 from odoo.exceptions import ValidationError, AccessError, MissingError, Warning
 
 
-class Compras(models.Model):
+class Compras(models.Model):#Requerido Old
     _name = "dtm.compras.requerido"
     _description = "Modulo de compras"
 
@@ -18,6 +18,8 @@ class Compras(models.Model):
     cantidad = fields.Integer(string="Cantidad", readonly=True)
     disenador = fields.Char(string="Solicita", readonly=True)
     nesteo = fields.Boolean()
+    extra_materials = fields.Boolean()
+
 
     def write(self,vals):
 
@@ -67,6 +69,7 @@ class Realizado(models.Model):
     notas = fields.Char(string='Notas', readonly=True)
     notas_almacen = fields.Char(string = 'Notas', readonly=True)
     listo_btn = fields.Boolean()
+    extra_materials = fields.Boolean(readonly=True,default=False)
 
     def write(self, vals):
         res = super(Realizado, self).write(vals)
@@ -194,34 +197,46 @@ class SoloMaterial(models.Model):
             result.costo = result.cantidad * result.unitario
 
     def action_wizard(self):
-        # print(self.nombre,self.proveedor_id.nombre)
-        self.env['dtm.compras.conceptos'].search([]).unlink()
-        self.env.cr.execute(f"SELECT setval('dtm_compras_conceptos_id_seq', 1, false);")
-        get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', self.codigo),('nombre','=',self.nombre)])
-        for result in get_material:
-            get_orden = self.env['dtm.odt'].search([('ot_number', '=', result.orden_trabajo)], limit=1)
-            vals = {
-                    'orden_trabajo':result.orden_trabajo,
-                    'nombre':get_orden.product_name,
-                    'cliente':get_orden.name_client,
-                    'disenador':result.disenador,
-                    'cantidad':result.cantidad,
-                    'nesteo':True if result.nesteo else False,
-                    'material':result.nombre,
-                    'codigo':int(result.codigo)
+        # Solo para cotización desde ventas
+        get_requerido = self.env['dtm.compras.requerido'].search([('tipo_orden', '=', 'Cotización'),('nombre','=',self.nombre)],limit=1)
+        if get_requerido:
+            get_materiales = self.env['dtm.cotizacion.materiales'].search([('material_descripcion', '=', self.nombre)])
+            for item in get_materiales:
+                if item.model_id.model_id.no_cotizacion == get_requerido.orden_trabajo:
+                    item.write({'precio_unitario': self.unitario, 'espera': False, 'proveedor':self.proveedor_id.nombre})
+                    break
+            get_requerido.unlink()  # <- primero éste
+            self.unlink()           # <- self al final
+            return {'type': 'ir.actions.act_window_close'}  # o la acción que corresponda para no redibujar self
+        else:
+            self.env['dtm.compras.conceptos'].search([]).unlink()
+            self.env.cr.execute(f"SELECT setval('dtm_compras_conceptos_id_seq', 1, false);")
+            get_material = self.env['dtm.compras.requerido'].search([('codigo', '=', self.codigo),('nombre','=',self.nombre)])
+            for result in get_material:
+                get_orden = self.env['dtm.odt'].search([('ot_number', '=', result.orden_trabajo)], limit=1)
+                vals = {
+                        'orden_trabajo':result.orden_trabajo,
+                        'nombre':get_orden.product_name,
+                        'cliente':get_orden.name_client,
+                        'disenador':result.disenador,
+                        'cantidad':result.cantidad,
+                        'nesteo':True if result.nesteo else False,
+                        'material':result.nombre,
+                        'codigo':int(result.codigo),
+                        'extra_materials':True if result.extra_materials else False,
+                }
+                self.env['dtm.compras.conceptos'].create(vals)
+
+
+            return{
+                'name': 'Confirmar Compra',
+                'type': 'ir.actions.act_window',
+                'res_model':'dtm.compras.confirm.wizard',
+                'view_mode':'form',
+                'view_id':self.env.ref('dtm_compras.view_compras_confirm_wizard').id,
+                'target':'new',
+                'context':{'default_compra_id':self.id,'permiso':self.permiso},
             }
-            self.env['dtm.compras.conceptos'].create(vals)
-
-
-        return{
-            'name': 'Confirmar Compra',
-            'type': 'ir.actions.act_window',
-            'res_model':'dtm.compras.confirm.wizard',
-            'view_mode':'form',
-            'view_id':self.env.ref('dtm_compras.view_compras_confirm_wizard').id,
-            'target':'new',
-            'context':{'default_compra_id':self.id,'permiso':self.permiso},
-        }
 
     def action_done(self):
         # Pasa la información a compras realizado
@@ -271,6 +286,7 @@ class SoloMaterial(models.Model):
                         'mostrador':self.mostrador,
                         'mayoreo':self.mayoreo,
                         'autoriza':self.user,
+                        'extra_materials':material.extra_materials,
                     }
                     # Pasa la información a realizados
                     self.env['dtm.compras.realizado'].create(vals)
@@ -305,7 +321,7 @@ class SoloMaterial(models.Model):
         # Vamos a quitar los items que ya fueron borrados de sus respectivas ordenes o en cantidad son cero
         for item in requerido:
             get_odt = self.env['dtm.odt'].search([('ot_number','=',item.orden_trabajo),('tipe_order','=',item.tipo_orden),('revision_ot','=',item.revision_ot)],limit=1)
-            get_materials_line = self.env['dtm.materials.line'].search([('model_id','=',get_odt.id),('materials_list','=',item.codigo)])
+            get_materials_line = self.env['dtm.materials.line'].search([('model_id','=',get_odt.id),('materials_list','=',item.codigo),('materials_list.nombre','=',item.nombre)],limit=1)
             get_requi = self.env['dtm.requisicion'].search([('folio', '=', item.orden_trabajo)])
             get_requi_list = self.env['dtm.requisicion.material'].search([('model_id', '=', get_requi.id), ('codigo', '=', item.codigo)])
             if get_materials_line and get_materials_line.materials_required == 0:
@@ -418,6 +434,7 @@ class Conceptos(models.Model):
     material = fields.Char(readonly=True)
     codigo = fields.Integer(readonly=True)
     permiso = fields.Boolean(compute='_compute_permiso', readonly=True)
+    extra_materials = fields.Boolean(string='Extra Materials')
 
     def _compute_permiso(self):
         for record in self:
@@ -425,17 +442,7 @@ class Conceptos(models.Model):
             if self.env.user.partner_id.email in ['ventas1@dtmindustry.com','rafaguzmang@hotmail.com']:
                 record.permiso = True
 
-    def action_rechazar(self):
-
-        return {
-            'name': 'Confirmar',
-            'type': 'ir.actions.act_window',
-            'res_model': 'dtm.compras.rechazo.wizard',
-            'view_mode': 'form',
-            'view_id': self.env.ref('dtm_compras.view_dtm_compras_rechazo_wizard').id,
-            'target': 'new',
-            'context': {'orden_trabajo':self.orden_trabajo,'disenador':self.disenador,'cliente':self.cliente,'nombre':self.nombre,'material':self.material,'codigo':self.codigo}
-        }
+    
 
 class RechazarWizard(models.TransientModel):
     _name = "dtm.compras.rechazo.wizard"
