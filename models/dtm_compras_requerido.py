@@ -320,18 +320,39 @@ class SoloMaterial(models.Model):
         material = self.env['dtm.compras.material'].search([])
         # Vamos a quitar los items que ya fueron borrados de sus respectivas ordenes o en cantidad son cero
         for item in requerido:
-            get_odt = self.env['dtm.odt'].search([('ot_number','=',item.orden_trabajo),('tipe_order','=',item.tipo_orden),('revision_ot','=',item.revision_ot)],limit=1)
-            get_materials_line = self.env['dtm.materials.line'].search([('model_id','=',get_odt.id),('materials_list','=',item.codigo),('materials_list.nombre','=',item.nombre)],limit=1)
-            get_requi = self.env['dtm.requisicion'].search([('folio', '=', item.orden_trabajo)])
-            get_requi_list = self.env['dtm.requisicion.material'].search([('model_id', '=', get_requi.id), ('codigo', '=', item.codigo)])
-            if get_materials_line and get_materials_line.materials_required == 0:
+            odt = self.env['dtm.odt'].search([
+                ('ot_number', '=', item.orden_trabajo),
+                ('tipe_order', '=', item.tipo_orden),
+                ('revision_ot', '=', item.revision_ot),
+            ], limit=1)
+
+            get_materials_line = self.env['dtm.materials.line'].search([
+                ('model_id', '=', odt.id),
+                ('materials_list', '=', item.codigo),
+                ('materials_list.nombre', '=', item.nombre),
+                ('extra_materials', '=', item.extra_materials),
+            ], limit=1)
+
+            if not get_materials_line:
                 item.unlink()
-            if get_requi_list and get_requi_list.cantidad == 0:
+                continue  # evita evaluar/borrar de nuevo el mismo item
+
+            get_requi = self.env['dtm.requisicion'].search([('folio', '=', item.orden_trabajo)])
+            get_requi_list = self.env['dtm.requisicion.material'].search([
+                ('model_id', '=', get_requi.id),
+                ('codigo', '=', item.codigo),
+            ])
+
+            if not get_requi_list:
                 item.unlink()
 
         for item in material:
-            get_requerido = self.env['dtm.compras.requerido'].search([('codigo','=',item.codigo),('nombre','=',item.nombre)],limit=1)
-            item.unlink() if get_requerido.cantidad == 0 else None
+            get_requerido = self.env['dtm.compras.requerido'].search([
+                ('codigo', '=', item.codigo),
+                ('nombre', '=', item.nombre),
+            ])
+            if not get_requerido or sum(get_requerido.mapped('cantidad')) == 0:
+                item.unlink()
 
         # Se recorre un set con los códigos de requerido para hacer la suma de las cantidades a comprar
         set_requerido = list(set(requerido.mapped('codigo')))
