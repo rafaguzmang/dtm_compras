@@ -55,15 +55,15 @@ class Realizado(models.Model):
     nombre = fields.Char(string="Nombre", readonly=True)
     cantidad = fields.Integer(string="Cantidad", readonly=True)
     cantidad_almacen = fields.Integer(string="C-Real", readonly=True)
-    unitario = fields.Float(string="P.Unitario", readonly=True)
-    costo = fields.Float(string="Total", readonly=True)
+    unitario = fields.Float(string="P.Unitario", readonly=False)
+    costo = fields.Float(string="Total", readonly=False)
     orden_compra = fields.Char(string="Orden de Compra" )
     fecha_compra = fields.Date(string="Fecha de compra", readonly=True)
     fecha_recepcion = fields.Date(string="Fecha de estimada de recepción", readonly=True)
     comprado = fields.Char(string="Recibido", readonly=True)
     aprovacion = fields.Char(string="Aprovado", readonly=True)
-    mostrador = fields.Float(string='Mostrador', readonly=True)
-    mayoreo = fields.Float(string='Mayoreo', readonly=True)
+    mostrador = fields.Float(string='Mostrador', readonly=False)
+    mayoreo = fields.Float(string='Mayoreo', readonly=False)
     autoriza = fields.Char(string='Autorizó',readonly=True)
     factura = fields.Char(string='Factura', readonly=True)
     notas = fields.Char(string='Notas', readonly=True)
@@ -253,7 +253,7 @@ class SoloMaterial(models.Model):
             get_material = self.env['dtm.materiales'].search([('id','=',self.codigo)],limit=1)
             if get_material.nombre and get_material.nombre in self.nombre:
                 get_material.write({'mostrador':self.mostrador,'mayoreo':self.mayoreo})
-                get_precios = self.env['dtm.compras.precios'].search([('codigo','=',self.codigo)])
+                get_precios = self.env['dtm.compras.precios'].search([('codigo','=',self.codigo)],limit=1)
                 vals = {
                     'codigo':get_material.id,
                     'tipo_material':'Indirecto',
@@ -319,32 +319,29 @@ class SoloMaterial(models.Model):
         requerido = self.env['dtm.compras.requerido'].search([])
         material = self.env['dtm.compras.material'].search([])
         # Vamos a quitar los items que ya fueron borrados de sus respectivas ordenes o en cantidad son cero
-        for item in requerido:
-            odt = self.env['dtm.odt'].search([
-                ('ot_number', '=', item.orden_trabajo),
-                ('tipe_order', '=', item.tipo_orden),
-                ('revision_ot', '=', item.revision_ot),
-            ], limit=1)
+        # for item in requerido:
+        #     if item.tipo_orden in ['OT','NPI']:                
+        #         odt = self.env['dtm.odt'].search([
+        #             ('ot_number', '=', item.orden_trabajo),
+        #             ('tipe_order', '=', item.tipo_orden),
+        #             ('revision_ot', '=', item.revision_ot),
+        #         ], limit=1)
 
-            get_materials_line = self.env['dtm.materials.line'].search([
-                ('model_id', '=', odt.id),
-                ('materials_list', '=', item.codigo),
-                ('materials_list.nombre', '=', item.nombre),
-                ('extra_materials', '=', item.extra_materials),
-            ], limit=1)
-
-            if not get_materials_line:
-                item.unlink()
-                continue  # evita evaluar/borrar de nuevo el mismo item
-
-            get_requi = self.env['dtm.requisicion'].search([('folio', '=', item.orden_trabajo)])
-            get_requi_list = self.env['dtm.requisicion.material'].search([
-                ('model_id', '=', get_requi.id),
-                ('codigo', '=', item.codigo),
-            ])
-
-            if not get_requi_list:
-                item.unlink()
+        #         get_materials_line = self.env['dtm.materials.line'].search([
+        #             ('model_id', '=', odt.id),
+        #             ('materials_list', '=', item.codigo),
+        #             ('extra_materials', '=', item.extra_materials),
+        #         ], limit=1)
+        #         if not get_materials_line:
+        #             item.unlink() 
+        #     elif item.tipo_orden == 'Requi':
+        #         get_requi = self.env['dtm.requisicion'].search([('folio', '=', item.orden_trabajo)])
+        #         get_requi_list = self.env['dtm.requisicion.material'].search([
+        #             ('model_id', '=', get_requi.id),
+        #             ('codigo', '=', item.codigo),
+        #         ])
+        #         if not get_requi_list:
+        #             item.unlink()
 
         for item in material:
             get_requerido = self.env['dtm.compras.requerido'].search([
