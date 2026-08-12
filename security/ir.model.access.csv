@@ -1,7 +1,7 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_dtm_compras_requerido_administrador,access.dtm.compras.requerido,model_dtm_compras_requerido,group_compras_admin,1,1,1,1
 access_dtm_compras_requerido_usuario,access.dtm.compras.requerido,model_dtm_compras_requerido,group_compras_user,1,1,1,0
-access_dtm_compras_requerido_restringido,access.dtm.compras.restringido,model_dtm_compras_restringido,group_compras_restringido,1,1,1,0
+access_dtm_compras_requerido_restringido,access.dtm.compras.restringido,model_dtm_compras_requerido,group_compras_restringido,1,1,1,0
 
 access_dtm_compras_realizado_administrador,access.dtm.compras.realizado_administrador,model_dtm_compras_realizado,group_compras_admin,1,1,1,1
 access_dtm_compras_realizado_usuario,access.dtm.compras.realizado_usuario,model_dtm_compras_realizado,group_compras_user,1,1,1,0
