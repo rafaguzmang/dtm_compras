@@ -457,7 +457,7 @@ class Conceptos(models.Model):
     def _compute_permiso(self):
         for record in self:
             record.permiso = False
-            if self.env.user.partner_id.email in ['ventas1@dtmindustry.com','rafaguzmang@hotmail.com']:
+            if self.env.user.partner_id.email in ['ventas1@dtmindustry.com','rafaguzmang@hotmail.com','gerenteoperaciones@dtmindustry.com']:
                 record.permiso = True
 
     
