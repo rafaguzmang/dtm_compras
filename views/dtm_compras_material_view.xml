@@ -20,9 +20,22 @@
                     <field name="fecha_recepcion"/>
                     <field name="observacion"/>
                     <field name="retrazo" invisible="1"/>
-                    <button name="action_wizard" type="object" string="Listo" class="btn btn-primary" icon="fa-check"
-                            attrs="{'invisible': ['|','|','|','|',('costo','=',0),('proveedor_id','=',False),('mostrador','=',0),('mayoreo','=',0),('fecha_recepcion','=',False)]}"/>
-<!--                    <field name="listo" invisible="1"/>-->
+                    <field name="user_email" invisible="1"/>
+                   <button name="action_wizard"
+                        type="object"
+                        string="Listo"
+                        class="btn btn-primary"
+                        icon="fa-check"
+                        attrs="{'invisible': [
+                            '&amp;',
+                            ('user_email', 'not in', ['administracion@dtmindustry.com']),
+                            '|','|','|','|',
+                            ('costo', '=', 0),
+                            ('proveedor_id', '=', False),
+                            ('mostrador', '=', 0),
+                            ('mayoreo', '=', 0),
+                            ('fecha_recepcion', '=', False)
+                        ]}"/>
                 </tree>
             </field>
         </record>

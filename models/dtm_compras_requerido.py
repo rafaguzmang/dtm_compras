@@ -148,6 +148,7 @@ class SoloMaterial(models.Model):
     mostrador = fields.Float(string='Mostrador')
     mayoreo = fields.Float(string='Mayoreo')
     user = fields.Char()
+    user_email = fields.Char()
 
     #----------------------Tracking----------------------------------
     unitario_tracking = fields.Char(compute='_compute_unitario_tracking',tracking=True,store=True)
@@ -186,6 +187,7 @@ class SoloMaterial(models.Model):
         # Lógica para dar permisos de compra
         for result in self:
             result.user = self.env.user.partner_id.name
+            result.user_email = self.env.user.partner_id.email
             result.permiso = True if result.env.user.partner_id.email in ["hugo_chacon@dtmindustry.com",
                                                                           'ventas1@dtmindustry.com',
                                                                           "rafaguzmang@hotmail.com",
